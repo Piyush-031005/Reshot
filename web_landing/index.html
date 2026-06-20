@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReShot — AI Guided Photo Recreation & Location Discoveries</title>
+    <meta name="description" content="Recreate any photo perfectly with real-time AI pose overlays, camera angle instructions, and discover hidden travel locations.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- CUSTOM CURSOR -->
+    <div class="custom-cursor" id="customCursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-viewfinder"></div>
+    </div>
+
+    <!-- RETRO BOOT LOADER -->
+    <div class="boot-loader" id="bootLoader">
+        <div class="boot-terminal">
+            <div class="terminal-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="terminal-title">RESHOT_OS_INITIALIZER.EXE</span>
+            </div>
+            <div class="terminal-body">
+                <div class="boot-text" id="bootLogs">
+                    <p>> INITIATING BOOT SEQUENCE...</p>
+                    <p>> LOADING AI POSE DETECTION KERNEL [OK]</p>
+                    <p>> CONNECTING UTTARAKHAND LOCATION ENGINE [OK]</p>
+                    <p>> SYNCHRONIZING CAMERA AR OVERLAYS [OK]</p>
+                </div>
+                <div class="boot-progress-container">
+                    <div class="boot-progress-bar" id="bootProgressBar"></div>
+                </div>
+                <div class="boot-percentage" id="bootPercentage">00%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="app-container">
+        
+        <!-- HEADER / NAVIGATION -->
+        <header class="header">
+            <div class="logo-area">
+                <span class="logo-icon">📸</span>
+                <span class="logo-text">ReShot</span>
+            </div>
+            <nav class="nav-bar">
+                <a href="#hero" class="nav-link active">Home</a>
+                <a href="#pose-simulator" class="nav-link">Pose Sim</a>
+                <a href="#location-explorer" class="nav-link">Hidden Gems</a>
+                <a href="#features" class="nav-link">Features</a>
+            </nav>
+            <div class="nav-cta">
+                <a href="#download" class="btn btn-primary btn-sm btn-bounce">
+                    <span>GET RESHOT</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- FLOATING BACKGROUND DECORATIVE ELEMENTS -->
+        <div class="bg-grid"></div>
+        <div class="floating-blob pink-blob"></div>
+        <div class="floating-blob green-blob"></div>
+
+        <!-- HERO SECTION -->
+        <section id="hero" class="hero-section">
+            <div class="hero-content">
+                <div class="badge-row">
+                    <span class="funky-badge lime">100% AI POSE ENGINE</span>
+                    <span class="funky-badge pink">HIDDEN SPOT RADAR</span>
+                </div>
+                <h1 class="hero-title">
+                    <span class="glitch-text" data-text="RECREATE">RECREATE</span> <br>
+                    ANY SHOT, <span class="highlight-pink">ANYWHERE.</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Stop guessing your camera angles or struggle with poses. Upload any photo, get live AR outlines guided by AI, and track down underrated hidden waterfalls, lakes, and viewpoints.
+                </p>
+                <div class="hero-ctas">
+                    <a href="#pose-simulator" class="btn btn-primary btn-lg">
+                        <span>TRY LIVE DEMO</span>
+                    </a>
+                    <a href="#location-explorer" class="btn btn-secondary btn-lg">
+                        <span>FIND HIDDEN GEMS</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- DESKTOP WINDOWS GRID -->
+            <div class="hero-interactive">
+                <!-- WINDOW 1: Camera Preview Overlay -->
+                <div class="retro-window window-camera draggable" id="windowCamera">
+                    <div class="window-header">
+                        <span class="window-title"><i data-lucide="camera" class="header-icon"></i> LIVE_VIEWFINDER.EXE</span>
+                        <div class="window-actions">
+                            <span class="win-btn minimize"></span>
+                            <span class="win-btn maximize"></span>
+                            <span class="win-btn close"></span>
+                        </div>
+                    </div>
+                    <div class="window-body">
+                        <div class="camera-simulation">
+                            <video id="heroWebcam" autoplay playsinline class="camera-video hidden"></video>
+                            <img src="pose_art.png" alt="Pose Demonstration" class="camera-placeholder" id="heroPlaceholder">
+                            <button class="btn-activate-cam" id="btnActivateHeroCam" title="Activate Live Camera Feed"><i data-lucide="video" class="cam-icon"></i> ENABLE CAMERA</button>
+                            <div class="scanlines"></div>
+                            <div class="focus-brackets"></div>
+                            <!-- Live Floating Overlay UI -->
+                            <div class="live-overlay-hud">
+                                <div class="hud-item tilt-indicator">
+                                    <span class="hud-label">TILT</span>
+                                    <span class="hud-val hot-pink">12° L</span>
+                                </div>
+                                <div class="hud-item fov-indicator">
+                                    <span class="hud-label">FOV</span>
+                                    <span class="hud-val lime-green">24mm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WINDOW 2: Pose Score Widget -->
+                <div class="retro-window window-score draggable" id="windowScore">
+                    <div class="window-header">
+                        <span class="window-title"><i data-lucide="activity" class="header-icon"></i> MATCH_METER.SYS</span>
+                        <div class="window-actions">
+                            <span class="win-btn close"></span>
+                        </div>
+                    </div>
+                    <div class="window-body">
+                        <div class="score-container">
+                            <div class="score-radial">
+                                <svg class="progress-ring" width="120" height="120">
+                                    <circle class="progress-ring__background" stroke="#222" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                    <circle class="progress-ring__circle" stroke="#CEFF05" stroke-width="12" stroke-dasharray="314.16" stroke-dashoffset="62.83" fill="transparent" r="50" cx="60" cy="60"/>
+                                </svg>
+                                <div class="score-text">
+                                    <span class="score-number font-retro">80%</span>
+                                    <span class="score-lbl">MATCH</span>
+                                </div>
+                            </div>
+                            <div class="score-guidance">
+                                <p class="guidance-instruction blink">> MOVE LEFT 10 CM</p>
+                                <p class="guidance-instruction">> RAISE CHIN SLIGHTLY</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WINDOW 3: Radar Mini-map Widget -->
+                <div class="retro-window window-radar draggable" id="windowRadar">
+                    <div class="window-header">
+                        <span class="window-title"><i data-lucide="compass" class="header-icon"></i> GPS_RADAR.EXE</span>
+                        <div class="window-actions">
+                            <span class="win-btn close"></span>
+                        </div>
+                    </div>
+                    <div class="window-body">
+                        <div class="radar-hud">
+                            <div class="radar-sweep"></div>
+                            <div class="radar-dot dot-1" data-label="Sasling Falls"></div>
+                            <div class="radar-dot dot-2" data-label="Birthi Falls"></div>
+                            <div class="radar-dot dot-active" data-label="Chandak Falls"></div>
+                            <span class="radar-location-name font-retro">CHANDAK WATERFALL - 12KM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- POSE MATCHING SIMULATOR -->
+        <section id="pose-simulator" class="pose-sim-section">
+            <div class="section-header">
+                <span class="section-tag">interactive simulator</span>
+                <h2 class="section-title">TEST YOUR ALIGNMENT SKILLS</h2>
+                <p class="section-desc">Drag the camera view frame below to match the pose overlay guide. Can you hit the 95% perfect similarity threshold?</p>
+            </div>
+
+            <div class="simulator-box retro-card">
+                <div class="simulator-main">
+                    <!-- Left: Reference Card -->
+                    <div class="sim-ref-panel">
+                        <div class="sim-panel-header">REFERENCE POSE</div>
+                        <div class="sim-image-container">
+                            <img src="hero_cam.png" alt="Reference Camera" class="sim-ref-img">
+                            <div class="silhouette-overlay"></div>
+                        </div>
+                    </div>
+
+                    <!-- Middle: Live Simulation Screen -->
+                    <div class="sim-camera-panel">
+                        <div class="sim-panel-header">LIVE CAMERA FEED (WEBCAM)</div>
+                        <div class="camera-canvas-wrapper" id="cameraCanvasWrapper">
+                            <video id="simWebcam" autoplay playsinline class="camera-video hidden"></video>
+                            <img src="pose_art.png" alt="Simulated View" class="camera-placeholder" id="simPlaceholder" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.5;">
+                            <button class="btn-activate-cam" id="btnActivateSimCam"><i data-lucide="video" class="cam-icon"></i> ACTIVATE LIVE WEBCAM</button>
+                            
+                            <!-- Overlay Skeleton (Static target) -->
+                            <svg class="skeleton-svg target-skeleton" viewBox="0 0 200 200">
+                                <circle cx="100" cy="40" r="12" class="ske-head" />
+                                <line x1="100" y1="52" x2="100" y2="110" class="ske-bone" />
+                                <line x1="100" y1="65" x2="60" y2="90" class="ske-bone" />
+                                <line x1="60" y1="90" x2="45" y2="120" class="ske-bone" />
+                                <line x1="100" y1="65" x2="140" y2="90" class="ske-bone" />
+                                <line x1="140" y1="90" x2="155" y2="120" class="ske-bone" />
+                                <line x1="100" y1="110" x2="80" y2="160" class="ske-bone" />
+                                <line x1="100" y1="110" x2="120" y2="160" class="ske-bone" />
+                            </svg>
+
+                            <!-- User Skeleton (Draggable / Moving based on interactive input) -->
+                            <svg class="skeleton-svg user-skeleton" id="userSkeleton" viewBox="0 0 200 200">
+                                <circle cx="85" cy="45" r="12" class="ske-head" />
+                                <line x1="85" y1="57" x2="88" y2="115" class="ske-bone" />
+                                <line x1="88" y1="70" x2="52" y2="95" class="ske-bone" />
+                                <line x1="52" y1="95" x2="35" y2="123" class="ske-bone" />
+                                <line x1="88" y1="70" x2="128" y2="95" class="ske-bone" />
+                                <line x1="128" y1="95" x2="140" y2="123" class="ske-bone" />
+                                <line x1="88" y1="115" x2="72" y2="165" class="ske-bone" />
+                                <line x1="88" y1="115" x2="108" y2="165" class="ske-bone" />
+                            </svg>
+                            
+                            <div class="alignment-hud">
+                                <div class="hud-status" id="alignmentStatus">ALIGNMENT POOR (35%)</div>
+                                <div class="hud-indicator" id="alignmentArrow">← MOVE RIGHT</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Similarity Performance Gauge -->
+                    <div class="sim-stats-panel">
+                        <div class="sim-panel-header">REALTIME ANALYSIS</div>
+                        <div class="stat-gauge-block">
+                            <span class="stat-label">POSE SIMILARITY</span>
+                            <div class="stat-value-container">
+                                <span class="stat-number font-retro" id="simPercentage">35%</span>
+                            </div>
+                            <div class="stat-bar-outer">
+                                <div class="stat-bar-inner" id="simProgressBar"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-gauge-block">
+                            <span class="stat-label">CAMERA TILT MATCH</span>
+                            <span class="stat-sub-number font-retro" id="tiltMatchVal">62%</span>
+                        </div>
+                        <div class="stat-gauge-block">
+                            <span class="stat-label">SUBJECT SCALING</span>
+                            <span class="stat-sub-number font-retro" id="scaleMatchVal">48%</span>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-full disabled" id="btnCapture">
+                            <span id="captureBtnText">LOCKED (GET 90%+)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Control Sliders -->
+                <div class="simulator-controls">
+                    <div class="slider-control">
+                        <label for="posSlider">Pose Alignment (X-Axis offset)</label>
+                        <input type="range" id="posSlider" min="0" max="100" value="10">
+                    </div>
+                    <div class="slider-control">
+                        <label for="tiltSlider">Camera Tilt (Angle offset)</label>
+                        <input type="range" id="tiltSlider" min="-30" max="30" value="18">
+                    </div>
+                    <div class="slider-control">
+                        <label for="scaleSlider">Subject Framing (Scale offset)</label>
+                        <input type="range" id="scaleSlider" min="50" max="150" value="70">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOCATION DISCOVERY ENGINE -->
+        <section id="location-explorer" class="location-explorer-section">
+            <div class="section-header">
+                <span class="section-tag">RESHOT LOCATION INTELLIGENCE</span>
+                <h2 class="section-title">DISCOVER UNDERRATED SPOTS</h2>
+                <p class="section-desc">ReShot helps travelers spot hidden gems and tells you the exact coordinates and camera framing needed to recreate beautiful shots.</p>
+            </div>
+
+            <!-- Interactive Map & Card Explorer -->
+            <div class="location-display">
+                <!-- Location Cards Deck -->
+                <div class="cards-deck">
+                    <div class="location-card active" data-id="birthi" data-lat="30.1254" data-lng="80.1425" data-sim="91%">
+                        <div class="card-image-wrap">
+                            <img src="location_art.png" alt="Birthi Falls">
+                            <div class="card-badge font-retro">91% MATCH</div>
+                        </div>
+                        <div class="card-details">
+                            <h3>Birthi Falls</h3>
+                            <span class="card-distance">54 km away • Munsyari Road</span>
+                            <p>An underrated giant waterfall falling from 126m high. ReShot guides you to stand at the viewpoint bridge for a perfect backdrop layout matching.</p>
+                            <a href="https://maps.google.com" target="_blank" class="card-link">View Route <i data-lucide="arrow-up-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="location-card" data-id="chandak" data-lat="29.5985" data-lng="80.2033" data-sim="83%">
+                        <div class="card-image-wrap">
+                            <img src="score_art.png" alt="Chandak Falls">
+                            <div class="card-badge font-retro">83% MATCH</div>
+                        </div>
+                        <div class="card-details">
+                            <h3>Chandak Waterfall</h3>
+                            <span class="card-distance">12 km away • Pithoragarh</span>
+                            <p>A hidden paradise surrounded by thick forests. The ideal recreation angle requires shooting from a low height, looking upwards with a 35mm lens.</p>
+                            <a href="https://maps.google.com" target="_blank" class="card-link">View Route <i data-lucide="arrow-up-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="location-card" data-id="sasling" data-lat="29.6241" data-lng="80.1255" data-sim="76%">
+                        <div class="card-image-wrap">
+                            <img src="hero_cam.png" alt="Sasling Cascade">
+                            <div class="card-badge font-retro">76% MATCH</div>
+                        </div>
+                        <div class="card-details">
+                            <h3>Sasling Cascade</h3>
+                            <span class="card-distance">28 km away • Thal Route</span>
+                            <p>Tucked away from commercial travel routes. ReShot's scene recognition identifies this spot instantly and guides you on composition framing.</p>
+                            <a href="https://maps.google.com" target="_blank" class="card-link">View Route <i data-lucide="arrow-up-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location HUD Preview / Visual Panel -->
+                <div class="location-preview-panel retro-card">
+                    <div class="hud-top-bar">
+                        <span class="dot red"></span>
+                        <span class="panel-tag font-retro">LOCATION_INTEL.SYS</span>
+                    </div>
+                    <div class="hud-content">
+                        <div class="map-coordinates font-retro">
+                            <p>LAT: <span id="lblLat">30.1254</span></p>
+                            <p>LNG: <span id="lblLng">80.1425</span></p>
+                            <p>ALT: 2,210m</p>
+                        </div>
+                        <div class="scanning-circle">
+                            <div class="scan-grid"></div>
+                            <div class="radar-line"></div>
+                            <div class="target-marker animate-pulse"></div>
+                        </div>
+                        <div class="spot-advice">
+                            <h4>RECREATION TIPS:</h4>
+                            <ul id="recreationTips">
+                                <li>📸 Recommended lens: Ultra-wide (16-24mm)</li>
+                                <li>👤 Subject positioning: Center lower third</li>
+                                <li>⏰ Best light: 3:00 PM - 5:00 PM</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DETAILED FEATURES SECTION -->
+        <section id="features" class="features-section">
+            <div class="section-header">
+                <span class="section-tag">core capabilities</span>
+                <h2 class="section-title">THE RESHOT SUITE</h2>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card retro-card">
+                    <div class="feat-icon-container bg-pink">
+                        <i data-lucide="camera" class="feat-icon"></i>
+                    </div>
+                    <h3>Pose Tracking</h3>
+                    <p>Uses on-device MediaPipe calculations to trace skeletons of reference photos. Overlay guides you perfectly.</p>
+                </div>
+                
+                <div class="feature-card retro-card">
+                    <div class="feat-icon-container bg-lime">
+                        <i data-lucide="rotate-cw" class="feat-icon"></i>
+                    </div>
+                    <h3>Camera Alignment</h3>
+                    <p>Reconstructs the camera height, tilt, distance, and framing boundaries automatically, signaling when you're set.</p>
+                </div>
+                
+                <div class="feature-card retro-card">
+                    <div class="feat-icon-container bg-black">
+                        <i data-lucide="navigation" class="feat-icon"></i>
+                    </div>
+                    <h3>Community Gems</h3>
+                    <p>Upload new hidden locations directly with geo-tags to challenge others to recreate your exact perspective.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- DOWNLOAD BANNER -->
+        <section id="download" class="download-section">
+            <div class="download-box retro-card">
+                <h2 class="download-title font-retro">EXCLUSIVE FOR ANDROID</h2>
+                <p>Join the photography recreation revolution. Download the APK directly or get it on the Play Store to start tracking hidden spots and matching poses.</p>
+                <div class="store-links">
+                    <a href="#" class="btn btn-primary btn-lg store-btn">
+                        <i data-lucide="play" class="btn-icon"></i>
+                        <span>GET IT ON GOOGLE PLAY</span>
+                    </a>
+                    <a href="#" class="btn btn-secondary btn-lg store-btn">
+                        <i data-lucide="download" class="btn-icon"></i>
+                        <span>DOWNLOAD APK (BETA)</span>
+                    </a>
+                </div>
+                <div class="android-spec font-retro" style="font-size: 8px; color: var(--hot-pink); margin-top: 10px;">
+                    * OPTIMIZED FOR ANDROID 11+ • ON-DEVICE ML CAPABILITIES
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>© 2026 ReShot AI. Built for creators and explorers. Unleash the pose.</p>
+        </footer>
+
+    </div>
+
+    <!-- RETRO SHOT CAPTURED MODAL -->
+    <div class="retro-modal hidden" id="capturedModal">
+        <div class="retro-window modal-window">
+            <div class="window-header">
+                <span class="window-title"><i data-lucide="check-circle" class="header-icon"></i> RESHOT_SUCCESS.EXE</span>
+                <div class="window-actions">
+                    <span class="win-btn close" id="btnCloseModal"></span>
+                </div>
+            </div>
+            <div class="window-body modal-body">
+                <div class="captured-preview-container">
+                    <canvas id="captureCanvas" class="hidden" width="300" height="300"></canvas>
+                    <img id="capturedImage" class="captured-img" src="" alt="Your Captured Reshot">
+                    <div class="captured-overlay-score font-retro">MATCH SCORE: <span id="modalScoreVal">94%</span></div>
+                </div>
+                <div class="modal-footer-info">
+                    <p class="blink font-retro">> PHOTO SAVED TO GALLERY</p>
+                    <button class="btn btn-secondary btn-full" id="btnShareModal">
+                        <span>SHARE RECREATION</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GSAP & Plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Main Script -->
+    <script src="script.js"></script>
+</body>
+</html>

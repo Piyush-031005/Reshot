@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "520505771644",
+    "project_id": "reshot-b706f",
+    "storage_bucket": "reshot-b706f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:520505771644:android:1f439bb622d14af3582bf9",
+        "android_client_info": {
+          "package_name": "com.reshot.app.reshot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpC9ZwGSVtBCs1EBdKNJ0zUihWEmLbXu0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
