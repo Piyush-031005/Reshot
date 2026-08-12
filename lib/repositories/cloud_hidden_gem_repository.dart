@@ -1,12 +1,11 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import '../models/hidden_gem_model.dart';
+import '../services/cloudinary_service.dart';
 
 class CloudHiddenGemRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   Future<HiddenGemModel> pushHiddenGem(HiddenGemModel gem, String uid) async {
     try {
@@ -16,9 +15,7 @@ class CloudHiddenGemRepository {
       if (cloudUrl == null && !gem.photoPath.startsWith('placeholder_')) {
         final File file = File(gem.photoPath);
         if (await file.exists()) {
-          final ref = _storage.ref().child('users/$uid/gems/${gem.id}.jpg');
-          await ref.putFile(file);
-          cloudUrl = await ref.getDownloadURL();
+          cloudUrl = await CloudinaryService.uploadImage(gem.photoPath);
         }
       }
 
@@ -28,15 +25,16 @@ class CloudHiddenGemRepository {
         cloudImageUrl: cloudUrl,
       );
 
+      debugPrint('CLOUDINARY_LOG [Pipeline Step 10: Firestore Write] Collection: hidden_gems, Doc ID: ${gem.id}, cloudImageUrl: $cloudUrl');
       await _firestore.collection('hidden_gems').doc(gem.id).set(
         gemToSync.toJson(),
         SetOptions(merge: true),
       );
 
-      debugPrint('CloudHiddenGemRepository: Gem ${gem.id} pushed successfully');
+      debugPrint('CLOUDINARY_LOG [Pipeline Step 11: Firestore Write Success] Gem ${gem.id} pushed successfully');
       return gemToSync;
     } catch (e) {
-      debugPrint('CloudHiddenGemRepository Error: Failed to push gem - $e');
+      debugPrint('CLOUDINARY_LOG [Pipeline Step 12: Repository Error] Failed to push gem - $e');
       rethrow;
     }
   }

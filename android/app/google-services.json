@@ -12,7 +12,12 @@
           "package_name": "com.reshot.app.reshot"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "520505771644-gnif09943pg9lvrlhs45bqdtjorapv7e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBpC9ZwGSVtBCs1EBdKNJ0zUihWEmLbXu0"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "520505771644-gnif09943pg9lvrlhs45bqdtjorapv7e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "520505771644-oreinfmknn767bki6dldbtqg8ijj1nb1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.reshot.app.reshot"
+              }
+            }
+          ]
         }
       }
     }

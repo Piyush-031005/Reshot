@@ -18,11 +18,15 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with SingleTickerProviderStateMixin {
   List<HiddenGemModel> _allGems = [];
   List<HiddenGemModel> _filteredGems = [];
   late HiddenGemModel _selectedGem;
   bool _isLoading = true;
+
+  late AnimationController _bannerController;
+  late Animation<double> _bannerBounce;
 
   // Search and Filter State
   final _searchController = TextEditingController();
@@ -32,7 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     'Temple',
     'Cafe',
     'Sunrise Spot',
-    'Hidden Gem'
+    'Hidden Gem',
   ];
   final List<String> _selectedFilters = [];
 
@@ -41,28 +45,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     _loadGems();
     _searchController.addListener(_applyFilters);
+
+    _bannerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..forward();
+
+    _bannerBounce = CurvedAnimation(
+      parent: _bannerController,
+      curve: Curves.elasticOut,
+    );
   }
 
   Future<void> _loadGems() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+    setState(() => _isLoading = true);
     try {
-      final list = await context.read<AppRepositoryProvider>().hiddenGemRepository.getHiddenGems();
+      final list = await context
+          .read<AppRepositoryProvider>()
+          .hiddenGemRepository
+          .getHiddenGems();
       setState(() {
         _allGems = list;
         _isLoading = false;
-        if (list.isNotEmpty) {
-          _selectedGem = list[0];
-        }
+        if (list.isNotEmpty) _selectedGem = list[0];
         _applyFilters();
       });
     } catch (e) {
       debugPrint('Error loading gems: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -92,408 +102,557 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'RESHOT AI',
-          style: GoogleFonts.pressStart2p(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: CyberTheme.limeGreen,
+      backgroundColor: CyberTheme.cream,
+      appBar: _buildAppBar(),
+      body: _isLoading
+          ? _buildLoadingState()
+          : SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Hero Banner
+                  ScaleTransition(
+                    scale: _bannerBounce,
+                    child: _buildHeroBanner(),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Camera Modes Section
+                  _buildSectionLabel('📸 COMPOSITION CAMERA'),
+                  const SizedBox(height: 12),
+                  _buildCameraModeTiles(),
+                  const SizedBox(height: 28),
+
+                  // Explore Gems Section
+                  _buildSectionLabel('💎 EXPLORE GEMS'),
+                  const SizedBox(height: 12),
+                  _buildSearchBar(),
+                  const SizedBox(height: 12),
+                  _buildFilterChips(),
+                  const SizedBox(height: 16),
+                  _buildGemsList(),
+                  const SizedBox(height: 20),
+
+                  // Radar Panel
+                  if (_allGems.isNotEmpty && _filteredGems.isNotEmpty)
+                    _buildRadarPanel(),
+
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: CyberTheme.cream,
+      elevation: 0,
+      centerTitle: true,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: CyberTheme.limeGreen,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: CyberTheme.outlineBlack, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: CyberTheme.outlineBlack,
+                  offset: Offset(3, 3),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('📷', style: TextStyle(fontSize: 16)),
+            ),
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
-            tooltip: 'Explorer Console',
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (c) => const ProfileScreen()),
-              );
-              // Reload in case custom profile changes affect stats rendering
-              _loadGems();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.photo_library_outlined, color: Colors.white),
-            tooltip: 'Open Gallery',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (c) => const GalleryScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_location_alt_outlined, color: Colors.white),
-            tooltip: 'Add Hidden Gem',
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (c) => const CreateGemScreen()),
-              );
-              if (result == true) {
-                _loadGems(); // Reload list on successful save
-              }
-            },
+          const SizedBox(width: 10),
+          Text(
+            'ReSHOT',
+            style: GoogleFonts.boogaloo(
+              fontSize: 24,
+              color: CyberTheme.inkBlack,
+              letterSpacing: 1.5,
+            ),
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: CyberTheme.limeGreen))
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Banner header
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: CyberTheme.cartoonDecoration.copyWith(
-                        color: CyberTheme.hotPink,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'RECREATE ANY PHOTO',
-                            style: GoogleFonts.pressStart2p(
-                              fontSize: 12,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
+      actions: [
+        _buildAppBarIcon(Icons.account_circle_rounded, CyberTheme.electricBlue, () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (c) => const ProfileScreen()),
+          );
+          _loadGems();
+        }),
+        _buildAppBarIcon(Icons.photo_library_rounded, CyberTheme.hotPink, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (c) => const GalleryScreen()),
+          );
+        }),
+        _buildAppBarIcon(Icons.add_location_alt_rounded, CyberTheme.sunOrange, () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (c) => const CreateGemScreen()),
+          );
+          if (result == true) _loadGems();
+        }),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  Widget _buildAppBarIcon(IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 6, top: 8, bottom: 8),
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color, width: 2),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: CyberTheme.cartoonCard,
+            child: Column(
+              children: [
+                const Text('🌊', style: TextStyle(fontSize: 48)),
+                const SizedBox(height: 12),
+                Text(
+                  'Loading Gems...',
+                  style: GoogleFonts.boogaloo(fontSize: 18, color: CyberTheme.inkBlack),
+                ),
+                const SizedBox(height: 16),
+                LinearProgressIndicator(
+                  color: CyberTheme.limeGreen,
+                  backgroundColor: CyberTheme.cream,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: CyberTheme.pinkCartoonCard,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '📸 RECREATE ANY PHOTO',
+                  style: GoogleFonts.boogaloo(
+                    fontSize: 18,
+                    color: CyberTheme.cardWhite,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Frame the background, lock it, hand to a stranger — ReShot captures automatically when aligned!',
+                  style: GoogleFonts.nunito(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: CyberTheme.cardWhite,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: CyberTheme.cardWhite,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: CyberTheme.outlineBlack, width: 2.5),
+            ),
+            child: const Text('🎯', style: TextStyle(fontSize: 28)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.boogaloo(
+        fontSize: 18,
+        color: CyberTheme.inkBlack,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _buildCameraModeTiles() {
+    return Row(
+      children: [
+        Expanded(
+          child: _CameraModeCard(
+            emoji: '🎬',
+            title: 'DIRECTOR\nMODE',
+            subtitle: 'Handover Shutter Guide',
+            accentColor: CyberTheme.limeGreen,
+            onTap: () {
+              if (_allGems.isNotEmpty) _launchCamera(context, 'director');
+            },
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _CameraModeCard(
+            emoji: '🏔️',
+            title: 'LANDMARK\nECHO',
+            subtitle: 'Landscape Edges Guide',
+            accentColor: CyberTheme.electricBlue,
+            onTap: () {
+              if (_allGems.isNotEmpty) _launchCamera(context, 'echo');
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return TextField(
+      controller: _searchController,
+      style: GoogleFonts.nunito(
+        color: CyberTheme.inkBlack,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: InputDecoration(
+        hintText: 'Search spots...',
+        hintStyle: GoogleFonts.nunito(color: const Color(0xFFAAAAAA), fontWeight: FontWeight.w500),
+        prefixIcon: const Icon(Icons.search_rounded, color: CyberTheme.limeGreen),
+        filled: true,
+        fillColor: CyberTheme.cardWhite,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: CyberTheme.outlineBlack, width: 2.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFDDDDDD), width: 2),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: CyberTheme.limeGreen, width: 3),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+    );
+  }
+
+  Widget _buildFilterChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: _filterTags.map((tag) {
+          final isSelected = _selectedFilters.contains(tag);
+          final color = CyberTheme.gemTypeColor(tag);
+          final emoji = CyberTheme.gemTypeEmoji(tag);
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => _toggleFilter(tag),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.elasticOut,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? color : CyberTheme.cardWhite,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? CyberTheme.outlineBlack : const Color(0xFFCCCCCC),
+                    width: 2.5,
+                  ),
+                  boxShadow: isSelected
+                      ? const [
+                          BoxShadow(
+                            color: CyberTheme.outlineBlack,
+                            offset: Offset(3, 3),
+                            blurRadius: 0,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Frame the background composition, lock it, hand it to a stranger. ReShot captures automatically when aligned!',
-                            style: textTheme.bodyLarge?.copyWith(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  '$emoji ${tag.toUpperCase()}',
+                  style: GoogleFonts.nunito(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: isSelected ? CyberTheme.inkBlack : const Color(0xFF666666),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildGemsList() {
+    if (_filteredGems.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(28),
+        decoration: CyberTheme.cartoonCard,
+        child: Column(
+          children: [
+            const Text('🔍', style: TextStyle(fontSize: 40)),
+            const SizedBox(height: 12),
+            Text(
+              'No spots found',
+              style: GoogleFonts.boogaloo(fontSize: 18, color: CyberTheme.inkBlack),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Try adjusting your filters or add a new gem!',
+              style: GoogleFonts.nunito(fontSize: 13, color: const Color(0xFF888888)),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _filteredGems.length,
+      itemBuilder: (context, index) {
+        final gem = _filteredGems[index];
+        final isSelected = _allGems.isNotEmpty && gem.id == _selectedGem.id;
+        final primaryTag = gem.tags.isNotEmpty ? gem.tags[0] : 'Hidden Gem';
+        final tagColor = CyberTheme.gemTypeColor(primaryTag);
+        final emoji = CyberTheme.gemTypeEmoji(primaryTag);
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _PressableCard(
+            onTap: () => setState(() => _selectedGem = gem),
+            onDoubleTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (c) => GemDetailScreen(gem: gem)),
+            ),
+            decoration: isSelected ? CyberTheme.activeCartoonCard : CyberTheme.cartoonCard,
+            child: Row(
+              children: [
+                // Emoji badge
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: tagColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: tagColor, width: 2.5),
+                  ),
+                  child: Center(
+                    child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        gem.name,
+                        style: GoogleFonts.boogaloo(
+                          fontSize: 16,
+                          color: CyberTheme.inkBlack,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: tagColor.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${gem.latitude.toStringAsFixed(4)}, ${gem.longitude.toStringAsFixed(4)}',
+                              style: GoogleFonts.nunito(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: tagColor,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Title
-                    Text(
-                      'COMPOSITION CAMERA',
-                      style: textTheme.titleLarge?.copyWith(
-                        color: CyberTheme.limeGreen,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Navigation launch tiles
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              if (_allGems.isNotEmpty) {
-                                _launchCamera(context, 'director');
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: CyberTheme.cartoonDecoration,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Icon(
-                                    Icons.camera_alt_outlined,
-                                    color: CyberTheme.hotPink,
-                                    size: 32,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'DIRECTOR\nMODE',
-                                    style: GoogleFonts.spaceGrotesk(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'Handover Shutter Guide',
-                                    style: textTheme.bodyMedium?.copyWith(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              if (_allGems.isNotEmpty) {
-                                _launchCamera(context, 'echo');
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: CyberTheme.cartoonDecoration,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Icon(
-                                    Icons.landscape_outlined,
-                                    color: CyberTheme.limeGreen,
-                                    size: 32,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'LANDMARK\nECHO',
-                                    style: GoogleFonts.spaceGrotesk(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'Landscape Edges Guide',
-                                    style: textTheme.bodyMedium?.copyWith(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Search Bar
-                    Text(
-                      'EXPLORE GEMS INDEX',
-                      style: textTheme.titleLarge?.copyWith(
-                        color: CyberTheme.limeGreen,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Search spots by name or description...',
-                        hintStyle: const TextStyle(color: Colors.white30),
-                        prefixIcon: const Icon(Icons.search, color: CyberTheme.limeGreen),
-                        filled: true,
-                        fillColor: CyberTheme.cyberDark,
-                        border: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.black, width: 3),
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.black, width: 3),
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Filter chips list
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: _filterTags.map((tag) {
-                          final isSelected = _selectedFilters.contains(tag);
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: FilterChip(
-                              label: Text(
-                                tag.toUpperCase(),
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected ? Colors.black : Colors.white70,
-                                ),
-                              ),
-                              selected: isSelected,
-                              selectedColor: CyberTheme.limeGreen,
-                              backgroundColor: CyberTheme.cyberDark,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  color: isSelected ? Colors.black : Colors.white24,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.zero,
-                              ),
-                              onSelected: (_) => _toggleFilter(tag),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Hidden Gems Explorer Cards
-                    _filteredGems.isEmpty
-                        ? Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(20),
-                            decoration: CyberTheme.cartoonDecoration,
-                            child: const Center(
-                              child: Text(
-                                'NO SPOTS FOUND MATCHING FILTERS',
-                                style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _filteredGems.length,
-                            itemBuilder: (context, index) {
-                              final gem = _filteredGems[index];
-                              final isSelected = _allGems.isNotEmpty && gem.id == _selectedGem.id;
-
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedGem = gem;
-                                    });
-                                  },
-                                  onDoubleTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (c) => GemDetailScreen(gem: gem),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: isSelected
-                                        ? CyberTheme.activeCardDecoration
-                                        : CyberTheme.cartoonDecoration,
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 50,
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            color: isSelected ? CyberTheme.limeGreen : CyberTheme.cyberGray,
-                                            border: Border.all(color: Colors.black, width: 2),
-                                          ),
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.landscape,
-                                              color: isSelected ? Colors.black : Colors.white54,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                gem.name,
-                                                style: textTheme.titleLarge?.copyWith(fontSize: 16),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                '${gem.latitude.toStringAsFixed(4)}, ${gem.longitude.toStringAsFixed(4)}',
-                                                style: GoogleFonts.pressStart2p(
-                                                  fontSize: 8,
-                                                  color: CyberTheme.hotPink,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white54),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                    const SizedBox(height: 20),
-
-                    // Quick Intel Box
-                    if (_allGems.isNotEmpty && _filteredGems.isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: CyberTheme.cartoonDecoration,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'RADAR DESCRIPTION',
-                                  style: GoogleFonts.pressStart2p(
-                                    fontSize: 8,
-                                    color: CyberTheme.hotPink,
-                                  ),
-                                ),
-                                Text(
-                                  'ALT: ${_selectedGem.altitude}',
-                                  style: GoogleFonts.pressStart2p(
-                                    fontSize: 8,
-                                    color: CyberTheme.limeGreen,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Divider(color: Colors.white24, height: 16),
-                            Text(
-                              _selectedGem.description,
-                              style: textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 6,
-                              children: _selectedGem.tags.map((t) => Chip(
-                                    label: Text(t.toUpperCase(), style: const TextStyle(fontSize: 9, color: Colors.white)),
-                                    backgroundColor: Colors.black,
-                                    padding: EdgeInsets.zero,
-                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                                  )).toList(),
-                            ),
-                            const SizedBox(height: 14),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CyberTheme.limeGreen,
-                                foregroundColor: Colors.black,
-                                minimumSize: const Size(double.infinity, 50),
-                                shape: const RoundedRectangleBorder(
-                                  side: BorderSide(color: Colors.black, width: 3),
-                                  borderRadius: BorderRadius.zero,
-                                ),
-                              ),
-                              onPressed: () => _launchCamera(context, 'director'),
-                              child: Text(
-                                'LAUNCH DIRECTOR CAMERA',
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isSelected ? CyberTheme.limeGreen : const Color(0xFFCCCCCC),
+                  size: 24,
+                ),
+              ],
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRadarPanel() {
+    return Container(
+      width: double.infinity,
+      decoration: CyberTheme.cartoonCard,
+      child: Column(
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              color: CyberTheme.inkBlack,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+            ),
+            child: Row(
+              children: [
+                const Text('📡', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 8),
+                Text(
+                  'RADAR',
+                  style: GoogleFonts.boogaloo(
+                    fontSize: 16,
+                    color: CyberTheme.limeGreen,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: CyberTheme.limeGreen,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '⬆ ${_selectedGem.altitude}m',
+                    style: GoogleFonts.nunito(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: CyberTheme.inkBlack,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Body
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _selectedGem.name,
+                  style: GoogleFonts.boogaloo(fontSize: 22, color: CyberTheme.inkBlack),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _selectedGem.description,
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF555555),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Tags wrap
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: _selectedGem.tags.map((t) {
+                    final tc = CyberTheme.gemTypeColor(t);
+                    final te = CyberTheme.gemTypeEmoji(t);
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: tc.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: tc, width: 2),
+                      ),
+                      child: Text(
+                        '$te ${t.toUpperCase()}',
+                        style: GoogleFonts.nunito(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: tc,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+
+                // Launch button
+                _PressableButton(
+                  onTap: () => _launchCamera(context, 'director'),
+                  color: CyberTheme.limeGreen,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('🎬', style: TextStyle(fontSize: 18)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'LAUNCH DIRECTOR CAMERA',
+                        style: GoogleFonts.boogaloo(
+                          fontSize: 15,
+                          color: CyberTheme.inkBlack,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -510,17 +669,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       tips: [
         'Recommended lens: Wide Angle',
         'Subject: Center lower-third',
-        'Light: Morning golden hour'
+        'Light: Morning golden hour',
       ],
     );
 
     Navigator.push(
       ctx,
       MaterialPageRoute(
-        builder: (c) => DirectorCameraScreen(
-          location: location,
-          mode: mode,
-        ),
+        builder: (c) => DirectorCameraScreen(location: location, mode: mode),
       ),
     );
   }
@@ -528,6 +684,193 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _bannerController.dispose();
     super.dispose();
+  }
+}
+
+// ─── Reusable Pressable Card ──────────────────────────────────────────────────
+class _PressableCard extends StatefulWidget {
+  final Widget child;
+  final BoxDecoration decoration;
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+
+  const _PressableCard({
+    required this.child,
+    required this.decoration,
+    this.onTap,
+    this.onDoubleTap,
+  });
+
+  @override
+  State<_PressableCard> createState() => _PressableCardState();
+}
+
+class _PressableCardState extends State<_PressableCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      onDoubleTap: widget.onDoubleTap,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 80),
+        transform: _pressed
+            ? (Matrix4.identity()..translate(3.0, 3.0))
+            : Matrix4.identity(),
+        padding: const EdgeInsets.all(14),
+        decoration: _pressed
+            ? widget.decoration.copyWith(
+                boxShadow: const [],
+              )
+            : widget.decoration,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// ─── Reusable Pressable Button ────────────────────────────────────────────────
+class _PressableButton extends StatefulWidget {
+  final Widget child;
+  final Color color;
+  final VoidCallback? onTap;
+
+  const _PressableButton({
+    required this.child,
+    required this.color,
+    this.onTap,
+  });
+
+  @override
+  State<_PressableButton> createState() => _PressableButtonState();
+}
+
+class _PressableButtonState extends State<_PressableButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 80),
+        transform: _pressed
+            ? (Matrix4.identity()..translate(4.0, 4.0))
+            : Matrix4.identity(),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: widget.color,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+          boxShadow: _pressed
+              ? []
+              : const [
+                  BoxShadow(
+                    color: CyberTheme.outlineBlack,
+                    offset: Offset(4, 4),
+                    blurRadius: 0,
+                  ),
+                ],
+        ),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// ─── Camera Mode Card ─────────────────────────────────────────────────────────
+class _CameraModeCard extends StatefulWidget {
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  const _CameraModeCard({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  State<_CameraModeCard> createState() => _CameraModeCardState();
+}
+
+class _CameraModeCardState extends State<_CameraModeCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 80),
+        transform: _pressed
+            ? (Matrix4.identity()..translate(4.0, 4.0))
+            : Matrix4.identity(),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: CyberTheme.cardWhite,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+          boxShadow: _pressed
+              ? []
+              : const [
+                  BoxShadow(
+                    color: CyberTheme.outlineBlack,
+                    offset: Offset(5, 5),
+                    blurRadius: 0,
+                  ),
+                ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: widget.accentColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: widget.accentColor, width: 2.5),
+              ),
+              child: Text(widget.emoji, style: const TextStyle(fontSize: 24)),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              widget.title,
+              style: GoogleFonts.boogaloo(
+                fontSize: 15,
+                color: CyberTheme.inkBlack,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              widget.subtitle,
+              style: GoogleFonts.nunito(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF888888),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

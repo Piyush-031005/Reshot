@@ -7,6 +7,7 @@ import '../models/reshot_capture_model.dart';
 import '../models/profile_model.dart';
 import '../providers/repository_provider.dart';
 import '../theme/cyber_theme.dart';
+import '../widgets/cartoon_widgets.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,7 +16,8 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoadingStats = true;
 
@@ -29,45 +31,45 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   final List<Map<String, dynamic>> _achievementDefinitions = [
     {
       'id': 'first_capture',
-      'title': 'FIRST RECREATION',
+      'title': 'FIRST SHOT',
       'description': 'Capture your first ReShot',
-      'icon': Icons.camera_alt_outlined,
+      'emoji': '📸',
     },
     {
       'id': 'reshots_10',
       'title': 'DECATHLON',
       'description': 'Capture 10 ReShots',
-      'icon': Icons.photo_library_outlined,
+      'emoji': '🔟',
     },
     {
       'id': 'reshots_50',
       'title': 'HALF CENTURY',
       'description': 'Capture 50 ReShots',
-      'icon': Icons.stars_outlined,
+      'emoji': '🌟',
     },
     {
       'id': 'first_gem',
       'title': 'GEM SEEKER',
       'description': 'Discover your first Hidden Gem',
-      'icon': Icons.map_outlined,
+      'emoji': '💎',
     },
     {
       'id': 'gems_5',
       'title': 'GEM ELITE',
       'description': 'Discover 5 Hidden Gems',
-      'icon': Icons.diamond_outlined,
+      'emoji': '🏆',
     },
     {
       'id': 'match_90_club',
       'title': '90% CLUB',
       'description': 'Achieve a 90%+ match score',
-      'icon': Icons.workspace_premium_outlined,
+      'emoji': '🎯',
     },
     {
       'id': 'legendary_shot',
       'title': 'LEGEND SHOT',
       'description': 'Achieve a 95%+ match score',
-      'icon': Icons.flash_on_outlined,
+      'emoji': '⚡',
     },
   ];
 
@@ -79,16 +81,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Future<void> _loadDerivedStats() async {
-    setState(() {
-      _isLoadingStats = true;
-    });
-
+    setState(() => _isLoadingStats = true);
     try {
       final provider = context.read<AppRepositoryProvider>();
       final captures = await provider.galleryRepository.getCaptures();
       final gems = await provider.hiddenGemRepository.getHiddenGems();
 
-      // Count custom user-added gems (excluding standard default seed coordinates)
       const defaultIds = {
         '7f3e2a1c-4b5d-4e6f-8a9b-0c1d2e3f4a5b',
         'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -96,7 +94,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       };
       final customGems = gems.where((g) => !defaultIds.contains(g.id)).length;
 
-      // Calculate accuracy average from raw scores
       double totalAccuracy = 0.0;
       if (captures.isNotEmpty) {
         totalAccuracy = captures.map((c) => c.score).reduce((a, b) => a + b);
@@ -112,9 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       });
     } catch (e) {
       debugPrint('Error loading profile stats: $e');
-      setState(() {
-        _isLoadingStats = false;
-      });
+      setState(() => _isLoadingStats = false);
     }
   }
 
@@ -128,201 +123,340 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     final controller = TextEditingController(text: currentName);
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: CyberTheme.cyberBlack,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Colors.black, width: 4),
-          borderRadius: BorderRadius.zero,
-        ),
-        title: Text(
-          'UPDATE_IDENTITY.EXE',
-          style: GoogleFonts.pressStart2p(fontSize: 10, color: Colors.white),
-        ),
-        content: TextField(
-          controller: controller,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            labelText: 'EXPLORER ALIAS',
-            labelStyle: TextStyle(color: CyberTheme.hotPink),
-            filled: true,
-            fillColor: CyberTheme.cyberDark,
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white30, width: 2),
-              borderRadius: BorderRadius.zero,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: CyberTheme.limeGreen, width: 2),
-              borderRadius: BorderRadius.zero,
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('CANCEL', style: TextStyle(color: Colors.white70)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: CyberTheme.limeGreen,
-              foregroundColor: Colors.black,
-              shape: const RoundedRectangleBorder(
-                side: BorderSide(color: Colors.black, width: 2),
-                borderRadius: BorderRadius.zero,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: CyberTheme.cardWhite,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+            boxShadow: const [
+              BoxShadow(
+                color: CyberTheme.outlineBlack,
+                offset: Offset(6, 6),
+                blurRadius: 0,
               ),
-            ),
-            onPressed: () async {
-              final newName = controller.text.trim();
-              if (newName.isNotEmpty) {
-                await provider.updateProfileName(newName);
-              }
-              if (ctx.mounted) {
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(
-              'CONFIRM',
-              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
-            ),
+            ],
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: CyberTheme.electricBlue,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                  border: const Border(
+                    bottom: BorderSide(color: CyberTheme.outlineBlack, width: 3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Text('✏️', style: TextStyle(fontSize: 24)),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Edit Name',
+                      style: GoogleFonts.boogaloo(
+                        fontSize: 22,
+                        color: CyberTheme.cardWhite,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: controller,
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w600,
+                        color: CyberTheme.inkBlack,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'Explorer Name',
+                        labelStyle: GoogleFonts.nunito(
+                          fontWeight: FontWeight.w700,
+                          color: CyberTheme.electricBlue,
+                        ),
+                        filled: true,
+                        fillColor: CyberTheme.cream,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: CyberTheme.outlineBlack, width: 2.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: CyberTheme.electricBlue, width: 3),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(ctx),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                color: CyberTheme.cream,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFFCCCCCC), width: 2),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Cancel',
+                                  style: GoogleFonts.boogaloo(fontSize: 16, color: const Color(0xFF888888)),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              final newName = controller.text.trim();
+                              if (newName.isNotEmpty) {
+                                await provider.updateProfileName(newName);
+                              }
+                              if (ctx.mounted) Navigator.pop(ctx);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                color: CyberTheme.electricBlue,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: CyberTheme.outlineBlack,
+                                    offset: Offset(3, 3),
+                                    blurRadius: 0,
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '✓ Confirm',
+                                  style: GoogleFonts.boogaloo(fontSize: 16, color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Consumer<AppRepositoryProvider>(
       builder: (context, provider, child) {
         final profile = provider.profile;
         final progress = provider.getLevelProgress();
         final rank = provider.getRank();
-        final formattedJoinDate = 
-            'JOINED ${profile.joinDate.day}/${profile.joinDate.month}/${profile.joinDate.year}';
 
         return Scaffold(
+          backgroundColor: CyberTheme.cream,
           appBar: AppBar(
-            title: Text(
-              'EXPLORER_CONSOLE.SYS',
-              style: GoogleFonts.pressStart2p(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: CyberTheme.limeGreen,
+            backgroundColor: CyberTheme.cream,
+            elevation: 0,
+            leading: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: CyberTheme.cardWhite,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: CyberTheme.outlineBlack, width: 2),
+                ),
+                child: const Icon(Icons.arrow_back_rounded, color: CyberTheme.inkBlack, size: 20),
               ),
+            ),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🧭', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 8),
+                Text(
+                  'EXPLORER',
+                  style: GoogleFonts.boogaloo(
+                    fontSize: 22,
+                    color: CyberTheme.inkBlack,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ],
             ),
           ),
           body: Column(
             children: [
-              // HUD Header Panel
+              // Profile Header Card
               Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                color: CyberTheme.cyberDark,
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                decoration: CyberTheme.cartoonCard,
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        // Cyber circular avatar frame
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: CyberTheme.cyberGray,
-                            border: Border.all(color: CyberTheme.hotPink, width: 3),
-                            shape: BoxShape.circle,
+                    // Profile row
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Avatar circle
+                          Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              color: CyberTheme.hotPink.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: CyberTheme.hotPink, width: 3),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: CyberTheme.outlineBlack,
+                                  offset: Offset(3, 3),
+                                  blurRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Text('🧑‍🏕️', style: TextStyle(fontSize: 30)),
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.person_outline,
-                            size: 32,
-                            color: CyberTheme.hotPink,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      profile.explorerName,
-                                      style: textTheme.titleLarge?.copyWith(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w900,
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        profile.explorerName,
+                                        style: GoogleFonts.boogaloo(
+                                          fontSize: 22,
+                                          color: CyberTheme.inkBlack,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_note, color: CyberTheme.limeGreen, size: 20),
-                                    onPressed: () => _showEditNameDialog(profile.explorerName, provider),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    GestureDetector(
+                                      onTap: () => _showEditNameDialog(
+                                          profile.explorerName, provider),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: CyberTheme.electricBlue.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: CyberTheme.electricBlue,
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.edit_rounded,
+                                          color: CyberTheme.electricBlue,
+                                          size: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                // Rank badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
                                     color: CyberTheme.limeGreen,
-                                    child: Text(
-                                      rank.toUpperCase(),
-                                      style: GoogleFonts.pressStart2p(
-                                        fontSize: 7,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: CyberTheme.outlineBlack, width: 2),
+                                  ),
+                                  child: Text(
+                                    '⭐ ${rank.toUpperCase()}',
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: CyberTheme.inkBlack,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    formattedJoinDate,
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      fontSize: 10,
-                                      color: Colors.white30,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // XP Bar
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '⚡ ${progress['totalCurrent']} XP',
+                                style: GoogleFonts.nunito(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: CyberTheme.inkBlack,
+                                ),
+                              ),
+                              Text(
+                                progress['totalCurrent'] >= 2000
+                                    ? '🏆 MAX LEVEL'
+                                    : 'Next: ${progress['totalTarget']} XP',
+                                style: GoogleFonts.nunito(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF888888),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // XP Neon Progress Bar
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'XP: ${progress['totalCurrent']}',
-                          style: GoogleFonts.pressStart2p(fontSize: 8, color: Colors.white70),
-                        ),
-                        Text(
-                          progress['totalCurrent'] >= 2000 
-                              ? 'MAX LEVEL' 
-                              : 'NEXT: ${progress['totalTarget']} XP',
-                          style: GoogleFonts.pressStart2p(fontSize: 8, color: Colors.white54),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: double.infinity,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        border: Border.all(color: Colors.black, width: 2),
-                      ),
-                      child: Stack(
-                        children: [
-                          FractionallySizedBox(
-                            widthFactor: progress['percent'],
-                            child: Container(
-                              color: CyberTheme.limeGreen,
+                          const SizedBox(height: 8),
+                          // Candy-stripe XP bar
+                          Container(
+                            width: double.infinity,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEEEEEE),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: CyberTheme.outlineBlack, width: 2.5),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor:
+                                    (progress['percent'] as double).clamp(0.0, 1.0),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [CyberTheme.limeGreen, Color(0xFF8EE000)],
+                                    ),
+                                    borderRadius: BorderRadius.horizontal(
+                                      left: Radius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -332,34 +466,61 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 ),
               ),
 
-              // TabBar Navigation
+              // TabBar
               Container(
-                color: CyberTheme.cyberDark,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: CyberTheme.cardWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: CyberTheme.outlineBlack, width: 2.5),
+                ),
                 child: TabBar(
                   controller: _tabController,
-                  indicatorColor: CyberTheme.limeGreen,
+                  indicator: BoxDecoration(
+                    color: CyberTheme.inkBlack,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                   labelColor: CyberTheme.limeGreen,
-                  unselectedLabelColor: Colors.white30,
-                  labelStyle: GoogleFonts.pressStart2p(fontSize: 8, fontWeight: FontWeight.bold),
+                  unselectedLabelColor: const Color(0xFF888888),
+                  labelStyle: GoogleFonts.boogaloo(fontSize: 14, letterSpacing: 0.5),
+                  unselectedLabelStyle: GoogleFonts.nunito(
+                      fontSize: 13, fontWeight: FontWeight.w600),
+                  dividerColor: Colors.transparent,
                   tabs: const [
-                    Tab(text: 'INTEL & ARCHIVES'),
-                    Tab(text: 'TIMELINE.LOG'),
+                    Tab(text: '📊 Stats & Awards'),
+                    Tab(text: '📅 Timeline'),
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
 
               // Tab content
               Expanded(
                 child: _isLoadingStats
-                    ? const Center(child: CircularProgressIndicator(color: CyberTheme.limeGreen))
+                    ? Center(
+                        child: Container(
+                          margin: const EdgeInsets.all(32),
+                          padding: const EdgeInsets.all(24),
+                          decoration: CyberTheme.cartoonCard,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('⏳', style: TextStyle(fontSize: 40)),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Loading stats...',
+                                style: GoogleFonts.boogaloo(
+                                    fontSize: 18, color: CyberTheme.inkBlack),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                     : TabBarView(
                         controller: _tabController,
                         children: [
-                          // Tab 1: Stats & Achievements
-                          _buildStatsAndAchievementsTab(context, textTheme, profile),
-
-                          // Tab 2: Timeline list of recreations
-                          _buildTimelineTab(context, textTheme),
+                          _buildStatsAndAchievementsTab(profile),
+                          _buildTimelineTab(),
                         ],
                       ),
               ),
@@ -370,45 +531,64 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildStatsAndAchievementsTab(BuildContext context, TextTheme textTheme, ProfileModel profile) {
+  Widget _buildStatsAndAchievementsTab(ProfileModel profile) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Stats Row
+          // Stats grid
           Row(
             children: [
               Expanded(
-                child: _buildStatCard('CAPTURED', _totalCaptures.toString(), CyberTheme.hotPink),
+                child: CartoonStatBox(
+                  value: _totalCaptures.toString(),
+                  label: 'CAPTURED',
+                  emoji: '📸',
+                  color: CyberTheme.hotPink,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard('GEM_FOUND', _customGemsCount.toString(), CyberTheme.limeGreen),
+                child: CartoonStatBox(
+                  value: _customGemsCount.toString(),
+                  label: 'GEMS FOUND',
+                  emoji: '💎',
+                  color: CyberTheme.limeGreen,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
-                  'ACCURACY',
-                  '${_averageAccuracy.toStringAsFixed(1)}%',
-                  Colors.cyanAccent,
+                child: CartoonStatBox(
+                  value: '${_averageAccuracy.toStringAsFixed(1)}%',
+                  label: 'AVG MATCH',
+                  emoji: '🎯',
+                  color: CyberTheme.electricBlue,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 24),
 
-          // Achievements Title
-          Text(
-            'EXPLORATION AWARDS',
-            style: textTheme.titleLarge?.copyWith(
-              color: CyberTheme.limeGreen,
-              fontSize: 16,
-            ),
+          // Section label
+          Row(
+            children: [
+              const Text('🏅', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 8),
+              Text(
+                'ACHIEVEMENTS',
+                style: GoogleFonts.boogaloo(
+                  fontSize: 18,
+                  color: CyberTheme.inkBlack,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
 
-          // Grid of Achievements
+          // Achievement grid
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -421,49 +601,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             ),
             itemBuilder: (ctx, idx) {
               final ach = _achievementDefinitions[idx];
-              final isUnlocked = profile.unlockedAchievementIds.contains(ach['id']);
+              final isUnlocked =
+                  profile.unlockedAchievementIds.contains(ach['id']);
 
-              return Opacity(
-                opacity: isUnlocked ? 1.0 : 0.4,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: isUnlocked 
-                      ? CyberTheme.activeCardDecoration 
-                      : CyberTheme.cartoonDecoration.copyWith(
-                          color: CyberTheme.cyberDark.withAlpha(128),
-                        ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        ach['icon'] as IconData,
-                        color: isUnlocked ? CyberTheme.limeGreen : Colors.white24,
-                        size: 28,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        ach['title'] as String,
-                        style: GoogleFonts.pressStart2p(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          color: isUnlocked ? Colors.white : Colors.white30,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        ach['description'] as String,
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontSize: 9,
-                          color: isUnlocked ? Colors.white70 : Colors.white24,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
+              return _AchievementCard(
+                emoji: ach['emoji'] as String,
+                title: ach['title'] as String,
+                description: ach['description'] as String,
+                isUnlocked: isUnlocked,
               );
             },
           ),
@@ -472,60 +617,31 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: CyberTheme.cartoonDecoration,
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.pressStart2p(fontSize: 7, color: color),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTimelineTab(BuildContext context, TextTheme textTheme) {
+  Widget _buildTimelineTab() {
     if (_captures.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(28),
           child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: CyberTheme.cartoonDecoration,
+            padding: const EdgeInsets.all(28),
+            decoration: CyberTheme.cartoonCard,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.history,
-                  color: CyberTheme.hotPink,
-                  size: 48,
-                ),
+                const Text('📅', style: TextStyle(fontSize: 48)),
                 const SizedBox(height: 12),
                 Text(
-                  'TIMELINE EMPTY',
-                  style: GoogleFonts.pressStart2p(
-                    fontSize: 10,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  'No history yet!',
+                  style: GoogleFonts.boogaloo(fontSize: 20, color: CyberTheme.inkBlack),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Your captured recreations history logs will register here chronologically.',
-                  style: textTheme.bodyMedium,
+                  'Your captured recreations will appear here.',
+                  style: GoogleFonts.nunito(
+                    fontSize: 13,
+                    color: const Color(0xFF888888),
+                    height: 1.5,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -536,26 +652,38 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       itemCount: _captures.length,
       itemBuilder: (ctx, idx) {
         final capture = _captures[idx];
-        final formattedDate = 
+        final formattedDate =
             '${capture.timestamp.day}/${capture.timestamp.month}/${capture.timestamp.year.toString().substring(2)}';
+        final score = capture.displayScore;
+        Color scoreColor;
+        if (score >= 95) {
+          scoreColor = CyberTheme.limeGreen;
+        } else if (score >= 85) {
+          scoreColor = CyberTheme.hotPink;
+        } else if (score >= 70) {
+          scoreColor = CyberTheme.electricBlue;
+        } else {
+          scoreColor = CyberTheme.sunOrange;
+        }
 
         return IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Timeline connector graphic
+              // Timeline connector
               Column(
                 children: [
                   Container(
-                    width: 14,
-                    height: 14,
+                    width: 16,
+                    height: 16,
                     decoration: BoxDecoration(
-                      color: CyberTheme.limeGreen,
-                      border: Border.all(color: Colors.black, width: 2.5),
+                      color: scoreColor,
+                      border: Border.all(color: CyberTheme.outlineBlack, width: 2.5),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -564,86 +692,91 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         ? Container()
                         : Container(
                             width: 3,
-                            color: Colors.white12,
+                            color: const Color(0xFFCCCCCC),
                           ),
                   ),
                 ],
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
 
-              // Timeline Card Content
+              // Card
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0),
+                  padding: const EdgeInsets.only(bottom: 16),
                   child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: CyberTheme.cartoonDecoration.copyWith(
-                      color: Colors.white, // classic polaroid backplate
-                    ),
+                    padding: const EdgeInsets.all(12),
+                    decoration: CyberTheme.cartoonCard,
                     child: Row(
                       children: [
-                        // Polaroid Mini image box
+                        // Photo thumbnail
                         Container(
                           width: 60,
-                          height: 70,
+                          height: 72,
                           decoration: BoxDecoration(
-                            color: Colors.black,
-                            border: Border.all(color: Colors.black, width: 1.5),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: CyberTheme.outlineBlack, width: 2),
                           ),
-                          child: kIsWeb || capture.filePath.startsWith('http')
-                              ? Image.network(
-                                  capture.filePath,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (c, e, s) => const Icon(
-                                    Icons.broken_image,
-                                    color: CyberTheme.hotPink,
-                                    size: 16,
-                                  ),
-                                )
-                              : Image.file(
-                                  File(capture.filePath),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (c, e, s) => const Icon(
-                                    Icons.broken_image,
-                                    color: CyberTheme.hotPink,
-                                    size: 16,
-                                  ),
-                                ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: kIsWeb || capture.filePath.startsWith('http')
+                                ? Image.network(capture.filePath,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Center(
+                                          child: Text('🖼️',
+                                              style: TextStyle(fontSize: 20)),
+                                        ))
+                                : Image.file(File(capture.filePath),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Center(
+                                          child: Text('🖼️',
+                                              style: TextStyle(fontSize: 20)),
+                                        )),
+                          ),
                         ),
                         const SizedBox(width: 12),
 
-                        // Meta details
+                        // Details
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                capture.locationName.toUpperCase(),
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.black,
+                                capture.locationName,
+                                style: GoogleFonts.boogaloo(
+                                  fontSize: 15,
+                                  color: CyberTheme.inkBlack,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 3),
-                              Text(
-                                '${capture.displayScore}% MATCH',
-                                style: GoogleFonts.pressStart2p(
-                                  fontSize: 7,
-                                  fontWeight: FontWeight.bold,
-                                  color: CyberTheme.hotPink,
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: scoreColor.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border:
+                                      Border.all(color: scoreColor, width: 1.5),
+                                ),
+                                child: Text(
+                                  '${capture.displayScore}% match',
+                                  style: GoogleFonts.nunito(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: scoreColor,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 formattedDate,
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontSize: 10,
-                                  color: Colors.black54,
-                                  fontWeight: FontWeight.bold,
+                                style: GoogleFonts.nunito(
+                                  fontSize: 11,
+                                  color: const Color(0xFF888888),
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -658,6 +791,79 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           ),
         );
       },
+    );
+  }
+}
+
+// ─── Achievement Card ─────────────────────────────────────────────────────────
+class _AchievementCard extends StatelessWidget {
+  final String emoji;
+  final String title;
+  final String description;
+  final bool isUnlocked;
+
+  const _AchievementCard({
+    required this.emoji,
+    required this.title,
+    required this.description,
+    required this.isUnlocked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 400),
+      opacity: isUnlocked ? 1.0 : 0.45,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isUnlocked ? CyberTheme.cardWhite : const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isUnlocked ? CyberTheme.outlineBlack : const Color(0xFFDDDDDD),
+            width: 2.5,
+          ),
+          boxShadow: isUnlocked
+              ? const [
+                  BoxShadow(
+                    color: CyberTheme.outlineBlack,
+                    offset: Offset(4, 4),
+                    blurRadius: 0,
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              isUnlocked ? emoji : '🔒',
+              style: const TextStyle(fontSize: 28),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: GoogleFonts.boogaloo(
+                fontSize: 13,
+                color: isUnlocked ? CyberTheme.inkBlack : const Color(0xFFAAAAAA),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 3),
+            Text(
+              description,
+              style: GoogleFonts.nunito(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: isUnlocked ? const Color(0xFF888888) : const Color(0xFFCCCCCC),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
