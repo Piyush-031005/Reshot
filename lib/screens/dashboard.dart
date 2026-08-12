@@ -19,7 +19,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   List<HiddenGemModel> _allGems = [];
   List<HiddenGemModel> _filteredGems = [];
   late HiddenGemModel _selectedGem;
@@ -286,17 +286,17 @@ class _DashboardScreenState extends State<DashboardScreen>
                 Text(
                   '📸 RECREATE ANY PHOTO',
                   style: GoogleFonts.boogaloo(
-                    fontSize: 18,
+                    fontSize: 26, // Massive typography
                     color: CyberTheme.cardWhite,
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
-                  'Frame the background, lock it, hand to a stranger — ReShot captures automatically when aligned!',
+                  'FRAME IT. LOCK IT. HAND IT OVER.\nRESHOT AUTO-CAPTURES WHEN ALIGNED!',
                   style: GoogleFonts.nunito(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
                     color: CyberTheme.cardWhite,
                   ),
                 ),
@@ -736,7 +736,7 @@ class _PressableCardState extends State<_PressableCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 80),
         transform: _pressed
-            ? (Matrix4.identity()..translate(3.0, 3.0))
+            ? (Matrix4.identity()..translate(4.0, 4.0))
             : Matrix4.identity(),
         padding: const EdgeInsets.all(14),
         decoration: _pressed
@@ -779,20 +779,20 @@ class _PressableButtonState extends State<_PressableButton> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 80),
         transform: _pressed
-            ? (Matrix4.identity()..translate(4.0, 4.0))
+            ? (Matrix4.identity()..translate(8.0, 8.0))
             : Matrix4.identity(),
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
           color: widget.color,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+          border: Border.all(color: CyberTheme.outlineBlack, width: 4),
           boxShadow: _pressed
               ? []
               : const [
                   BoxShadow(
                     color: CyberTheme.outlineBlack,
-                    offset: Offset(4, 4),
+                    offset: Offset(8, 8),
                     blurRadius: 0,
                   ),
                 ],
@@ -836,19 +836,19 @@ class _CameraModeCardState extends State<_CameraModeCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 80),
         transform: _pressed
-            ? (Matrix4.identity()..translate(4.0, 4.0))
+            ? (Matrix4.identity()..translate(8.0, 8.0))
             : Matrix4.identity(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: CyberTheme.cardWhite,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+          border: Border.all(color: CyberTheme.outlineBlack, width: 4),
           boxShadow: _pressed
               ? []
               : const [
                   BoxShadow(
                     color: CyberTheme.outlineBlack,
-                    offset: Offset(5, 5),
+                    offset: Offset(8, 8),
                     blurRadius: 0,
                   ),
                 ],
@@ -869,12 +869,12 @@ class _CameraModeCardState extends State<_CameraModeCard> {
             Text(
               widget.title,
               style: GoogleFonts.boogaloo(
-                fontSize: 15,
+                fontSize: 20, // Increased size
                 color: CyberTheme.inkBlack,
-                height: 1.2,
+                height: 1.1,
               ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 8),
             Text(
               widget.subtitle,
               style: GoogleFonts.nunito(
