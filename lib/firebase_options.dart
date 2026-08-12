@@ -57,22 +57,22 @@ class DefaultFirebaseOptions {
     projectId: 'reshot-b706f',
     storageBucket: 'reshot-b706f.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCsYl1VzizIrIXB-75N9FPLbx-sgcUf8zE',
     appId: '1:520505771644:ios:a3e67133d97d6210582bf9',
     messagingSenderId: '520505771644',
     projectId: 'reshot-b706f',
     storageBucket: 'reshot-b706f.firebasestorage.app',
+    iosClientId: '520505771644-oreinfmknn767bki6dldbtqg8ijj1nb1.apps.googleusercontent.com',
     iosBundleId: 'com.reshot.app.reshot',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCsYl1VzizIrIXB-75N9FPLbx-sgcUf8zE',
     appId: '1:520505771644:ios:a3e67133d97d6210582bf9',
     messagingSenderId: '520505771644',
     projectId: 'reshot-b706f',
     storageBucket: 'reshot-b706f.firebasestorage.app',
+    iosClientId: '520505771644-oreinfmknn767bki6dldbtqg8ijj1nb1.apps.googleusercontent.com',
     iosBundleId: 'com.reshot.app.reshot',
   );
 
