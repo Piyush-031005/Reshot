@@ -129,11 +129,11 @@ class _ProfileScreenState extends State<ProfileScreen>
           decoration: BoxDecoration(
             color: CyberTheme.cardWhite,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+            border: Border.all(color: CyberTheme.outlineBlack, width: 4),
             boxShadow: const [
               BoxShadow(
                 color: CyberTheme.outlineBlack,
-                offset: Offset(6, 6),
+                offset: Offset(8, 8),
                 blurRadius: 0,
               ),
             ],
@@ -230,11 +230,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                               decoration: BoxDecoration(
                                 color: CyberTheme.electricBlue,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+                                border: Border.all(color: CyberTheme.outlineBlack, width: 4),
                                 boxShadow: const [
                                   BoxShadow(
                                     color: CyberTheme.outlineBlack,
-                                    offset: Offset(3, 3),
+                                    offset: Offset(4, 4),
                                     blurRadius: 0,
                                   ),
                                 ],
@@ -378,11 +378,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                               decoration: BoxDecoration(
                                 color: CyberTheme.hotPink.withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: CyberTheme.hotPink, width: 3),
+                                border: Border.all(color: CyberTheme.hotPink, width: 4),
                                 boxShadow: const [
                                   BoxShadow(
                                     color: CyberTheme.outlineBlack,
-                                    offset: Offset(3, 3),
+                                    offset: Offset(4, 4),
                                     blurRadius: 0,
                                   ),
                                 ],
@@ -530,23 +530,25 @@ class _ProfileScreenState extends State<ProfileScreen>
                 decoration: BoxDecoration(
                   color: CyberTheme.cardWhite,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: CyberTheme.outlineBlack, width: 2.5),
+                  border: Border.all(color: CyberTheme.outlineBlack, width: 4),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
                     color: CyberTheme.inkBlack,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicatorPadding: const EdgeInsets.all(4),
                   labelColor: CyberTheme.limeGreen,
                   unselectedLabelColor: const Color(0xFF888888),
-                  labelStyle: GoogleFonts.boogaloo(fontSize: 14, letterSpacing: 0.5),
+                  labelStyle: GoogleFonts.boogaloo(fontSize: 16, letterSpacing: 1),
                   unselectedLabelStyle: GoogleFonts.nunito(
-                      fontSize: 13, fontWeight: FontWeight.w600),
+                      fontSize: 14, fontWeight: FontWeight.w800),
                   dividerColor: Colors.transparent,
                   tabs: const [
-                    Tab(text: '📊 Stats & Awards'),
-                    Tab(text: '📅 Timeline'),
+                    Tab(height: 48, text: '📊 STATS & AWARDS'),
+                    Tab(height: 48, text: '📅 TIMELINE'),
                   ],
                 ),
               ),
