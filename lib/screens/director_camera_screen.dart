@@ -166,8 +166,8 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
 
       XFile file;
       if (_controller == null || !_controller!.value.isInitialized || kIsWeb) {
-        final seed = DateTime.now().millisecondsSinceEpoch;
-        final mockUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&h=800&fit=crop&sig=$seed';
+        // Anime-style Mount Fuji / Japan mock photo
+        final mockUrl = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=800&fit=crop';
         file = XFile(mockUrl);
       } else {
         file = await _controller!.takePicture();
@@ -197,11 +197,20 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
       _showCaptureSuccessDialog();
     } catch (e) {
       debugPrint('Error snapping picture: $e');
-      // Fix 1: mounted check in error handler too.
       if (!mounted) return;
       setState(() {
         _isCapturing = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to save photo! Check storage permissions.',
+            style: GoogleFonts.nunito(fontWeight: FontWeight.w800),
+          ),
+          backgroundColor: CyberTheme.hotPink,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -218,11 +227,11 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+            border: Border.all(color: CyberTheme.outlineBlack, width: 4),
             boxShadow: const [
               BoxShadow(
                 color: CyberTheme.outlineBlack,
-                offset: Offset(6, 6),
+                offset: Offset(8, 8),
                 blurRadius: 0,
               ),
             ],
@@ -266,11 +275,11 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+                        border: Border.all(color: CyberTheme.outlineBlack, width: 4),
                         boxShadow: const [
                           BoxShadow(
                             color: CyberTheme.outlineBlack,
-                            offset: Offset(4, 4),
+                            offset: Offset(8, 8),
                             blurRadius: 0,
                           ),
                         ],
@@ -437,9 +446,9 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                         alignment: Alignment.center,
                         children: [
                           Opacity(
-                            opacity: 0.15,
+                            opacity: 0.25,
                             child: Image.network(
-                              'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&h=800&fit=crop',
+                              'https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=800&fit=crop',
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: double.infinity,
