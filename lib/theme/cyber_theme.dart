@@ -143,11 +143,11 @@ class CyberTheme {
     return BoxDecoration(
       color: cardWhite,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: outlineBlack, width: 3),
+      border: Border.all(color: outlineBlack, width: 4), // Thicker border
       boxShadow: const [
         BoxShadow(
           color: outlineBlack,
-          offset: Offset(5, 5),
+          offset: Offset(8, 8), // More extreme 2D offset
           blurRadius: 0,
         ),
       ],
@@ -159,11 +159,11 @@ class CyberTheme {
     return BoxDecoration(
       color: cardWhite,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: limeGreen, width: 3.5),
+      border: Border.all(color: limeGreen, width: 4),
       boxShadow: const [
         BoxShadow(
           color: outlineBlack,
-          offset: Offset(5, 5),
+          offset: Offset(8, 8),
           blurRadius: 0,
         ),
       ],
@@ -175,11 +175,11 @@ class CyberTheme {
     return BoxDecoration(
       color: hotPink,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: outlineBlack, width: 3),
+      border: Border.all(color: outlineBlack, width: 4),
       boxShadow: const [
         BoxShadow(
           color: outlineBlack,
-          offset: Offset(5, 5),
+          offset: Offset(8, 8),
           blurRadius: 0,
         ),
       ],
@@ -191,11 +191,27 @@ class CyberTheme {
     return BoxDecoration(
       color: limeGreen,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: outlineBlack, width: 3),
+      border: Border.all(color: outlineBlack, width: 4),
       boxShadow: const [
         BoxShadow(
           color: outlineBlack,
-          offset: Offset(5, 5),
+          offset: Offset(8, 8),
+          blurRadius: 0,
+        ),
+      ],
+    );
+  }
+
+  /// Electric blue accent card
+  static BoxDecoration get blueCartoonCard {
+    return BoxDecoration(
+      color: electricBlue,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: outlineBlack, width: 4),
+      boxShadow: const [
+        BoxShadow(
+          color: outlineBlack,
+          offset: Offset(8, 8),
           blurRadius: 0,
         ),
       ],
@@ -206,18 +222,18 @@ class CyberTheme {
   static BoxDecoration get cartoonDecoration => BoxDecoration(
     color: darkSurface,
     borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: Colors.black, width: 3),
+    border: Border.all(color: Colors.black, width: 4),
     boxShadow: const [
-      BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+      BoxShadow(color: Colors.black, offset: Offset(6, 6), blurRadius: 0),
     ],
   );
 
   static BoxDecoration get activeCardDecoration => BoxDecoration(
     color: darkSurface,
     borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: limeGreen, width: 3),
+    border: Border.all(color: limeGreen, width: 4),
     boxShadow: const [
-      BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+      BoxShadow(color: Colors.black, offset: Offset(6, 6), blurRadius: 0),
     ],
   );
 
@@ -226,13 +242,13 @@ class CyberTheme {
     return ElevatedButton.styleFrom(
       backgroundColor: bg,
       foregroundColor: fg,
-      textStyle: GoogleFonts.boogaloo(fontSize: 16, letterSpacing: 0.5),
+      textStyle: GoogleFonts.boogaloo(fontSize: 18, letterSpacing: 1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: outlineBlack, width: 3),
+        side: const BorderSide(color: outlineBlack, width: 4),
       ),
       elevation: 0,
-      minimumSize: const Size(double.infinity, 56),
+      minimumSize: const Size(double.infinity, 60),
       shadowColor: Colors.transparent,
     );
   }
