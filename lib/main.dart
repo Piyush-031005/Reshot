@@ -4,7 +4,8 @@ import 'package:camera/camera.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'screens/dashboard.dart';
+import 'screens/splash_screen.dart';
+import 'screens/home_shell.dart';
 import 'theme/cyber_theme.dart';
 import 'repositories/gallery_repository.dart';
 import 'repositories/hidden_gem_repository.dart';
@@ -100,10 +101,15 @@ class ReShotApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ReShot AI',
+      title: 'ReShot',
       debugShowCheckedModeBanner: false,
       theme: CyberTheme.themeData,
-      home: const DashboardScreen(),
+      // Splash is the entry point — transitions to HomeShell (bottom nav) after animations
+      home: const SplashScreen(),
+      routes: {
+        '/home': (_) => const HomeShell(),
+        '/splash': (_) => const SplashScreen(),
+      },
     );
   }
 }
