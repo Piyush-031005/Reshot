@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../models/hidden_gem_model.dart';
 import '../providers/repository_provider.dart';
 import '../theme/cyber_theme.dart';
+import '../widgets/cartoon_widgets.dart';
 
 class CreateGemScreen extends StatefulWidget {
   const CreateGemScreen({super.key});
@@ -170,91 +171,157 @@ class _CreateGemScreenState extends State<CreateGemScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: CyberTheme.cyberDark,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Colors.black, width: 4),
-          borderRadius: BorderRadius.zero,
-        ),
-        title: Row(
-          children: [
-            const Icon(Icons.security, color: CyberTheme.hotPink),
-            const SizedBox(width: 8),
-            Text(
-              'CONFIRM_GEM_INTEL.SYS',
-              style: GoogleFonts.pressStart2p(fontSize: 10, color: Colors.white),
-            ),
-          ],
-        ),
-        content: SingleChildScrollView(
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: CyberTheme.cardWhite,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+            boxShadow: const [
+              BoxShadow(
+                color: CyberTheme.outlineBlack,
+                offset: Offset(6, 6),
+                blurRadius: 0,
+              ),
+            ],
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildReviewRow('SPOT NAME:', _nameController.text),
-              const SizedBox(height: 10),
-              _buildReviewRow('DESCRIPTION:', _descController.text),
-              const SizedBox(height: 10),
-              _buildReviewRow('LATITUDE:', lat.toStringAsFixed(6)),
-              const SizedBox(height: 10),
-              _buildReviewRow('LONGITUDE:', lng.toStringAsFixed(6)),
-              const SizedBox(height: 10),
-              // Fix 3: show real altitude in confirmation.
-              _buildReviewRow('ALTITUDE:', _formatAltitude()),
-              const SizedBox(height: 10),
-              _buildReviewRow(
-                'TAGS:',
-                _selectedTags.isEmpty ? 'None' : _selectedTags.join(', '),
+              // Header
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: CyberTheme.limeGreen,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                  border: const Border(
+                    bottom: BorderSide(color: CyberTheme.outlineBlack, width: 3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Text('🔍', style: TextStyle(fontSize: 24)),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Confirm Gem',
+                      style: GoogleFonts.boogaloo(
+                        fontSize: 20,
+                        color: CyberTheme.inkBlack,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 14),
-              const Divider(color: Colors.white24),
-              Text(
-                'Verify the coordinates and spot details. Once confirmed, this gem is saved to your explorer index.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildReviewRow('📍 Spot Name', _nameController.text),
+                      const SizedBox(height: 10),
+                      _buildReviewRow('📝 Description', _descController.text),
+                      const SizedBox(height: 10),
+                      _buildReviewRow('🌐 Latitude', lat.toStringAsFixed(6)),
+                      const SizedBox(height: 10),
+                      _buildReviewRow('🌐 Longitude', lng.toStringAsFixed(6)),
+                      const SizedBox(height: 10),
+                      _buildReviewRow('⬆️ Altitude', _formatAltitude()),
+                      const SizedBox(height: 10),
+                      _buildReviewRow(
+                        '🏷️ Tags',
+                        _selectedTags.isEmpty ? 'None' : _selectedTags.join(', '),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        'Once confirmed, this gem is saved to your explorer index.',
+                        style: GoogleFonts.nunito(
+                          fontSize: 12,
+                          color: const Color(0xFF888888),
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => Navigator.pop(ctx),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEEEEEE),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: const Color(0xFFCCCCCC), width: 2),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Cancel',
+                                    style: GoogleFonts.boogaloo(
+                                        fontSize: 15, color: const Color(0xFF888888)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: StatefulBuilder(
+                              builder: (context, setDialogState) {
+                                return GestureDetector(
+                                  onTap: _isSaving
+                                      ? null
+                                      : () async {
+                                          setDialogState(() {});
+                                          await _saveGem(lat, lng, ctx);
+                                        },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    decoration: BoxDecoration(
+                                      color: CyberTheme.limeGreen,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: CyberTheme.outlineBlack, width: 3),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: CyberTheme.outlineBlack,
+                                          offset: Offset(3, 3),
+                                          blurRadius: 0,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Center(
+                                      child: _isSaving
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.5,
+                                                color: CyberTheme.inkBlack,
+                                              ),
+                                            )
+                                          : Text(
+                                              '✓ Save Gem',
+                                              style: GoogleFonts.boogaloo(
+                                                fontSize: 15,
+                                                color: CyberTheme.inkBlack,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('CANCEL', style: TextStyle(color: Colors.white70)),
-          ),
-          // Fix 4: disable button while saving.
-          StatefulBuilder(
-            builder: (context, setDialogState) {
-              return ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CyberTheme.limeGreen,
-                  foregroundColor: Colors.black,
-                  shape: const RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
-                onPressed: _isSaving
-                    ? null
-                    : () async {
-                        setDialogState(() {});
-                        await _saveGem(lat, lng, ctx);
-                      },
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.black,
-                        ),
-                      )
-                    : Text(
-                        'CONFIRM & SAVE',
-                        style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
-                      ),
-              );
-            },
-          ),
-        ],
       ),
     );
   }
@@ -265,12 +332,19 @@ class _CreateGemScreenState extends State<CreateGemScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.pressStart2p(fontSize: 8, color: CyberTheme.hotPink),
+          style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF888888),
+          ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
         Text(
           value,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          style: GoogleFonts.boogaloo(
+            fontSize: 15,
+            color: CyberTheme.inkBlack,
+          ),
         ),
       ],
     );
@@ -315,287 +389,402 @@ class _CreateGemScreenState extends State<CreateGemScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
+      backgroundColor: CyberTheme.cream,
       appBar: AppBar(
-        title: Text(
-          'ADD_NEW_GEM.EXE',
-          style: GoogleFonts.pressStart2p(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: CyberTheme.limeGreen,
+        backgroundColor: CyberTheme.cream,
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: CyberTheme.cardWhite,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: CyberTheme.outlineBlack, width: 2),
+            ),
+            child: const Icon(Icons.arrow_back_rounded, color: CyberTheme.inkBlack, size: 20),
           ),
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('💎', style: TextStyle(fontSize: 20)),
+            const SizedBox(width: 8),
+            Text(
+              'ADD A GEM',
+              style: GoogleFonts.boogaloo(
+                fontSize: 20,
+                color: CyberTheme.inkBlack,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // GPS Status Panel
+              // ── GPS Status Card ─────────────────────────────────────────
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: CyberTheme.cartoonDecoration,
+                decoration: CyberTheme.cartoonCard,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'GPS RADAR STATUS',
-                      style: GoogleFonts.pressStart2p(
-                        fontSize: 9,
-                        color: CyberTheme.hotPink,
+                    // Header
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _isGpsLoading
+                            ? CyberTheme.electricBlue
+                            : _gpsError && !_useManualCoordinates
+                                ? CyberTheme.hotPink
+                                : CyberTheme.limeGreen,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                        border: const Border(
+                          bottom: BorderSide(color: CyberTheme.outlineBlack, width: 3),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    if (_isGpsLoading) ...[
-                      const Center(
-                        child: CircularProgressIndicator(color: CyberTheme.limeGreen),
-                      ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: Text(_gpsStatusMessage, style: textTheme.bodyMedium),
-                      )
-                    ] else if (_gpsError && !_useManualCoordinates) ...[
-                      Text(
-                        _gpsStatusMessage,
-                        style: const TextStyle(color: Colors.redAccent, fontSize: 13),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: CyberTheme.hotPink,
-                              foregroundColor: Colors.black,
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                            ),
-                            onPressed: _fetchGpsCoordinates,
-                            child: const Text('RETRY GPS'),
-                          ),
-                          const SizedBox(width: 14),
-                          OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: CyberTheme.limeGreen, width: 2),
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _useManualCoordinates = true;
-                              });
-                            },
-                            child: const Text('SELECT MANUALLY',
-                                style: TextStyle(color: CyberTheme.limeGreen)),
-                          ),
-                        ],
-                      )
-                    ] else ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Row(
                         children: [
                           Text(
-                            _useManualCoordinates
-                                ? 'MANUAL COORDINATES OVERRIDE'
-                                : 'GPS LOCKED SUCCESSFULLY',
-                            style: GoogleFonts.pressStart2p(
-                              fontSize: 8,
-                              color: CyberTheme.limeGreen,
-                            ),
+                            _isGpsLoading
+                                ? '📡'
+                                : _gpsError && !_useManualCoordinates
+                                    ? '❌'
+                                    : '✅',
+                            style: const TextStyle(fontSize: 16),
                           ),
-                          // Fix 5: retry always available; success will reset manual mode.
-                          IconButton(
-                            icon: const Icon(Icons.refresh, color: Colors.white70),
-                            tooltip: 'Retry GPS',
-                            onPressed: _fetchGpsCoordinates,
+                          const SizedBox(width: 8),
+                          Text(
+                            _isGpsLoading
+                                ? 'Finding Location...'
+                                : _gpsError && !_useManualCoordinates
+                                    ? 'GPS Error'
+                                    : _useManualCoordinates
+                                        ? 'Manual Coords'
+                                        : 'GPS Locked!',
+                            style: GoogleFonts.boogaloo(
+                              fontSize: 15,
+                              color: CyberTheme.inkBlack,
+                            ),
                           ),
                         ],
                       ),
-                      const Divider(color: Colors.white24),
-                      if (_useManualCoordinates) ...[
-                        Row(
-                          children: [
-                            const Text('LAT: '),
-                            Expanded(
-                              child: Slider(
-                                value: _manualLat,
-                                min: 28.0,
-                                max: 31.0,
-                                activeColor: CyberTheme.hotPink,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _manualLat = val;
-                                  });
-                                },
+                    ),
+
+                    // Body
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          if (_isGpsLoading) ...[
+                            const LinearProgressIndicator(
+                              color: CyberTheme.electricBlue,
+                              backgroundColor: Color(0xFFEEEEEE),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _gpsStatusMessage,
+                              style: GoogleFonts.nunito(
+                                fontSize: 13,
+                                color: const Color(0xFF666666),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ] else if (_gpsError && !_useManualCoordinates) ...[
+                            Text(
+                              _gpsStatusMessage,
+                              style: GoogleFonts.nunito(
+                                fontSize: 13,
+                                color: CyberTheme.hotPink,
+                                height: 1.4,
                               ),
                             ),
-                            Text(_manualLat.toStringAsFixed(4)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            const Text('LNG: '),
-                            Expanded(
-                              child: Slider(
-                                value: _manualLng,
-                                min: 78.0,
-                                max: 81.0,
-                                activeColor: CyberTheme.hotPink,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _manualLng = val;
-                                  });
-                                },
-                              ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: CartoonButton(
+                                    label: 'Retry GPS',
+                                    emoji: '🔄',
+                                    color: CyberTheme.electricBlue,
+                                    textColor: Colors.white,
+                                    height: 46,
+                                    fontSize: 13,
+                                    onTap: _fetchGpsCoordinates,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: CartoonButton(
+                                    label: 'Manual',
+                                    emoji: '🗺️',
+                                    color: CyberTheme.limeGreen,
+                                    textColor: CyberTheme.inkBlack,
+                                    height: 46,
+                                    fontSize: 13,
+                                    onTap: () => setState(() => _useManualCoordinates = true),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(_manualLng.toStringAsFixed(4)),
+                          ] else ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _useManualCoordinates
+                                      ? 'Manual Override Active'
+                                      : 'Auto-captured!',
+                                  style: GoogleFonts.nunito(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF444444),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: _fetchGpsCoordinates,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: CyberTheme.electricBlue.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: CyberTheme.electricBlue, width: 1.5),
+                                    ),
+                                    child: Text(
+                                      '🔄 Retry',
+                                      style: GoogleFonts.nunito(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: CyberTheme.electricBlue,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            if (_useManualCoordinates) ...[
+                              _buildSliderRow('LAT', _manualLat, 28.0, 31.0,
+                                  (val) => setState(() => _manualLat = val)),
+                              const SizedBox(height: 8),
+                              _buildSliderRow('LNG', _manualLng, 78.0, 81.0,
+                                  (val) => setState(() => _manualLng = val)),
+                            ] else ...[
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _CoordChip(
+                                      label: 'LAT',
+                                      value: _latitude?.toStringAsFixed(5) ?? '-',
+                                      color: CyberTheme.hotPink,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _CoordChip(
+                                      label: 'LNG',
+                                      value: _longitude?.toStringAsFixed(5) ?? '-',
+                                      color: CyberTheme.electricBlue,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _CoordChip(
+                                      label: 'ALT',
+                                      value: _altitude != null
+                                          ? '${_altitude!.toStringAsFixed(0)}m'
+                                          : '...',
+                                      color: CyberTheme.limeGreen,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
-                        ),
-                      ] else ...[
-                        Text(
-                          'LAT: ${_latitude?.toStringAsFixed(6)}',
-                          style:
-                              GoogleFonts.pressStart2p(fontSize: 10, color: Colors.white70),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'LNG: ${_longitude?.toStringAsFixed(6)}',
-                          style:
-                              GoogleFonts.pressStart2p(fontSize: 10, color: Colors.white70),
-                        ),
-                        const SizedBox(height: 6),
-                        // Fix 3: show real altitude from GPS.
-                        Text(
-                          'ALT: ${_altitude != null ? "${_altitude!.toStringAsFixed(0)}m" : "Acquiring..."}',
-                          style:
-                              GoogleFonts.pressStart2p(fontSize: 10, color: Colors.white70),
-                        ),
-                      ],
-                    ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              // Spot Name
-              Text(
-                'SPOT NAME',
-                style: textTheme.titleLarge?.copyWith(fontSize: 16, color: CyberTheme.limeGreen),
-              ),
-              const SizedBox(height: 6),
+              // ── Spot Name ───────────────────────────────────────────────
+              SectionHeader(title: 'SPOT NAME', emoji: '📍'),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _nameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: GoogleFonts.nunito(
+                  fontWeight: FontWeight.w600,
+                  color: CyberTheme.inkBlack,
+                ),
+                decoration: InputDecoration(
                   hintText: 'e.g. Birthi View Bridge',
-                  hintStyle: TextStyle(color: Colors.white30),
                   filled: true,
-                  fillColor: CyberTheme.cyberDark,
+                  fillColor: CyberTheme.cardWhite,
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 3),
-                    borderRadius: BorderRadius.zero,
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: CyberTheme.outlineBlack, width: 2.5),
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFCCCCCC), width: 2),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: CyberTheme.limeGreen, width: 3),
+                  ),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text('🏷️', style: TextStyle(fontSize: 18)),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
                 validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Please enter a name for the spot.';
-                  }
+                  if (val == null || val.trim().isEmpty) return 'Please enter a spot name.';
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Description
-              Text(
-                'DESCRIPTION',
-                style: textTheme.titleLarge?.copyWith(fontSize: 16, color: CyberTheme.limeGreen),
-              ),
-              const SizedBox(height: 6),
+              // ── Description ─────────────────────────────────────────────
+              SectionHeader(title: 'DESCRIPTION', emoji: '📝'),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _descController,
-                maxLines: 3,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'Describe how to find the rock and compose the framing...',
-                  hintStyle: TextStyle(color: Colors.white30),
+                maxLines: 4,
+                style: GoogleFonts.nunito(
+                  fontWeight: FontWeight.w600,
+                  color: CyberTheme.inkBlack,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Describe how to find the spot and compose the framing...',
                   filled: true,
-                  fillColor: CyberTheme.cyberDark,
+                  fillColor: CyberTheme.cardWhite,
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 3),
-                    borderRadius: BorderRadius.zero,
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: CyberTheme.outlineBlack, width: 2.5),
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFCCCCCC), width: 2),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: CyberTheme.electricBlue, width: 3),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
                 validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Please enter a description.';
-                  }
+                  if (val == null || val.trim().isEmpty) return 'Please enter a description.';
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Tags
-              Text(
-                'SELECT SPOT TAGS',
-                style: textTheme.titleLarge?.copyWith(fontSize: 16, color: CyberTheme.limeGreen),
-              ),
+              // ── Tags ────────────────────────────────────────────────────
+              SectionHeader(title: 'SPOT TAGS', emoji: '🏷️'),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: _availableTags.map((tag) {
                   final isSelected = _selectedTags.contains(tag);
-                  return FilterChip(
-                    label: Text(
-                      tag.toUpperCase(),
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.black : Colors.white,
+                  final tagColor = CyberTheme.gemTypeColor(tag);
+                  final tagEmoji = CyberTheme.gemTypeEmoji(tag);
+                  return GestureDetector(
+                    onTap: () => _toggleTag(tag),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? tagColor : CyberTheme.cardWhite,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected ? CyberTheme.outlineBlack : const Color(0xFFCCCCCC),
+                          width: 2.5,
+                        ),
+                        boxShadow: isSelected
+                            ? const [
+                                BoxShadow(
+                                  color: CyberTheme.outlineBlack,
+                                  offset: Offset(3, 3),
+                                  blurRadius: 0,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Text(
+                        '$tagEmoji ${tag.toUpperCase()}',
+                        style: GoogleFonts.nunito(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: isSelected ? CyberTheme.inkBlack : const Color(0xFF888888),
+                        ),
                       ),
                     ),
-                    selected: isSelected,
-                    selectedColor: CyberTheme.limeGreen,
-                    backgroundColor: CyberTheme.cyberDark,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                        color: isSelected ? Colors.black : Colors.white24,
-                        width: 1.5,
-                      ),
-                      borderRadius: BorderRadius.zero,
-                    ),
-                    onSelected: (_) => _toggleTag(tag),
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
 
-              // Submit
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CyberTheme.hotPink,
-                  foregroundColor: Colors.black,
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: const RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.black, width: 3),
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
-                onPressed: _handleSubmit,
-                child: Text(
-                  'SUBMIT DETAILS',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 16,
-                  ),
-                ),
+              // ── Submit ──────────────────────────────────────────────────
+              CartoonButton(
+                label: 'SUBMIT GEM',
+                emoji: '💎',
+                color: CyberTheme.hotPink,
+                textColor: Colors.white,
+                height: 60,
+                onTap: _handleSubmit,
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSliderRow(
+      String label, double value, double min, double max, ValueChanged<double> onChanged) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 42,
+          child: Text(
+            label,
+            style: GoogleFonts.boogaloo(fontSize: 13, color: CyberTheme.inkBlack),
+          ),
+        ),
+        Expanded(
+          child: SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: CyberTheme.hotPink,
+              inactiveTrackColor: const Color(0xFFDDDDDD),
+              thumbColor: CyberTheme.hotPink,
+              overlayShape: SliderComponentShape.noOverlay,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+            ),
+            child: Slider(value: value, min: min, max: max, onChanged: onChanged),
+          ),
+        ),
+        Text(
+          value.toStringAsFixed(3),
+          style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: CyberTheme.inkBlack,
+          ),
+        ),
+      ],
     );
   }
 
@@ -604,5 +793,52 @@ class _CreateGemScreenState extends State<CreateGemScreen> {
     _nameController.dispose();
     _descController.dispose();
     super.dispose();
+  }
+}
+
+// ─── Coord Chip ───────────────────────────────────────────────────────────────
+class _CoordChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _CoordChip({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color, width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: 1,
+            ),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: CyberTheme.inkBlack,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
