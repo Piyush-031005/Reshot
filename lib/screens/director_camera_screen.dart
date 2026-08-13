@@ -52,6 +52,8 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
 
   String _activeState = 'lock';
   XFile? _capturedFile;
+  
+  double _ghostOpacity = 0.4; // Initial ghost opacity
 
   @override
   void initState() {
@@ -416,17 +418,72 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                       ),
                     ),
 
-                  // Overlay
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: CompositionOverlayPainter(
-                        pitch: _pitch,
-                        roll: _roll,
-                        posX: _posX,
-                        scale: _scale,
-                        isAligned: _isAligned,
-                        activeState: _activeState,
+                  // Ghost Photographer AR Layer (Reference Photo)
+                  IgnorePointer(
+                    child: Opacity(
+                      opacity: _ghostOpacity,
+                      child: Image.network(
+                        'https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=800&fit=crop', // Temporary default
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
                       ),
+                    ),
+                  ),
+
+                  // The Grid/Crosshair overlay
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        painter: CompositionOverlayPainter(
+                          pitch: _pitch,
+                          roll: _roll,
+                          posX: _posX,
+                          scale: _scale,
+                          isAligned: _isAligned,
+                          activeState: _activeState,
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  // Vertical Opacity Slider for Ghost Layer
+                  Positioned(
+                    right: 16,
+                    top: 100,
+                    bottom: 200,
+                    child: Column(
+                      children: [
+                        Text(
+                          'GHOST',
+                          style: ReShotDesignSystem.textTheme.titleSmall!.copyWith(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        ),
+                        Expanded(
+                          child: RotatedBox(
+                            quarterTurns: 3,
+                            child: SliderTheme(
+                              data: SliderThemeData(
+                                activeTrackColor: ReShotDesignSystem.neonLime,
+                                inactiveTrackColor: Colors.white30,
+                                thumbColor: ReShotDesignSystem.cardWhite,
+                                overlayColor: ReShotDesignSystem.neonLime.withValues(alpha: 0.2),
+                                trackHeight: 6,
+                              ),
+                              child: Slider(
+                                value: _ghostOpacity,
+                                min: 0.0,
+                                max: 1.0,
+                                onChanged: (val) {
+                                  setState(() => _ghostOpacity = val);
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
