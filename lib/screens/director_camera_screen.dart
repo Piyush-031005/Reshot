@@ -84,15 +84,21 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
     });
   }
 
+  DateTime _lastSensorUpdate = DateTime.now();
+
   void _startSensorTracking() {
     _sensorSubscription = accelerometerEventStream().listen((AccelerometerEvent event) {
-      // Fix 1: mounted check inside stream listener
       if (!mounted) return;
-      setState(() {
-        _pitch = event.x;
-        _roll = event.y;
-        _calculateScore();
-      });
+      
+      final now = DateTime.now();
+      if (now.difference(_lastSensorUpdate).inMilliseconds > 50) {
+        _lastSensorUpdate = now;
+        setState(() {
+          _pitch = event.x;
+          _roll = event.y;
+          _calculateScore();
+        });
+      }
     });
   }
 

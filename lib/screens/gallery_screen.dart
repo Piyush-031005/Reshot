@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 import '../models/reshot_capture_model.dart';
 import '../widgets/share_card_widget.dart';
 import '../providers/repository_provider.dart';
-import '../theme/cyber_theme.dart';
+import '../theme/design_system.dart';
+import '../theme/motion_system.dart';
+import 'dart:math' as math;
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -32,79 +34,76 @@ class _GalleryScreenState extends State<GalleryScreen> {
           .read<AppRepositoryProvider>()
           .galleryRepository
           .getCaptures();
+      
+      if (!mounted) return;
       setState(() {
-        _captures = data;
+        _captures = data.reversed.toList(); // Newest first
         _isLoading = false;
       });
     } catch (e) {
       debugPrint('Error loading captures: $e');
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }
 
-  String _getBadgeTier(double score) {
-    if (score >= 95.0) return '🌟 LEGENDARY';
-    if (score >= 85.0) return '🔥 EPIC';
-    if (score >= 70.0) return '✨ GREAT';
-    return '👍 GOOD TRY';
+  Color _getBadgeColor(double score) {
+    if (score >= 95.0) return ReShotDesignSystem.neonLime;
+    if (score >= 85.0) return Colors.cyanAccent;
+    if (score >= 70.0) return ReShotDesignSystem.sunOrange;
+    return ReShotDesignSystem.hotPink;
   }
 
-  Color _getBadgeColor(double score) {
-    if (score >= 95.0) return CyberTheme.limeGreen;
-    if (score >= 85.0) return CyberTheme.hotPink;
-    if (score >= 70.0) return CyberTheme.electricBlue;
-    return CyberTheme.sunOrange;
+  String _getBadgeLabel(double score) {
+    if (score >= 95.0) return 'GOD TIER';
+    if (score >= 85.0) return 'EPIC';
+    if (score >= 70.0) return 'SOLID';
+    return 'NOVICE';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CyberTheme.cream,
+      backgroundColor: ReShotDesignSystem.darkBg,
       appBar: AppBar(
-        backgroundColor: CyberTheme.cream,
+        backgroundColor: ReShotDesignSystem.darkBg,
         elevation: 0,
+        toolbarHeight: 80,
         leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
+          onTap: () {
+            MotionSystem.triggerImpactShake();
+            Navigator.pop(context);
+          },
           child: Container(
-            margin: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(left: 16, top: 16, bottom: 16),
             decoration: BoxDecoration(
-              color: CyberTheme.cardWhite,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: CyberTheme.outlineBlack, width: 2),
+              color: ReShotDesignSystem.cardWhite,
+              border: ReShotDesignSystem.brutalistBorder,
             ),
-            child: const Icon(Icons.arrow_back_rounded, color: CyberTheme.inkBlack, size: 20),
+            child: const Icon(Icons.arrow_back_rounded, color: ReShotDesignSystem.inkBlack, size: 24),
           ),
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🖼️', style: TextStyle(fontSize: 20)),
-            const SizedBox(width: 8),
-            Text(
-              'MY GALLERY',
-              style: GoogleFonts.boogaloo(
-                fontSize: 20,
-                color: CyberTheme.inkBlack,
-                letterSpacing: 1,
-              ),
-            ),
-          ],
+        title: Text(
+          'THE VAULT',
+          style: ReShotDesignSystem.textTheme.displayMedium!.copyWith(
+            color: Colors.white,
+            fontSize: 28,
+          ),
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            margin: const EdgeInsets.only(right: 16, top: 16, bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: CyberTheme.limeGreen.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: CyberTheme.limeGreen, width: 2),
+              color: ReShotDesignSystem.hotPink,
+              border: ReShotDesignSystem.brutalistBorder,
             ),
-            child: Text(
-              '${_captures.length} shots',
-              style: GoogleFonts.nunito(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: CyberTheme.inkBlack,
+            child: Center(
+              child: Text(
+                '${_captures.length} SHOTS',
+                style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -120,27 +119,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   Widget _buildLoadingState() {
     return Center(
-      child: Container(
-        margin: const EdgeInsets.all(32),
-        padding: const EdgeInsets.all(28),
-        decoration: CyberTheme.cartoonCard,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('📷', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 12),
-            Text(
-              'Loading shots...',
-              style: GoogleFonts.boogaloo(fontSize: 18, color: CyberTheme.inkBlack),
-            ),
-            const SizedBox(height: 16),
-            LinearProgressIndicator(
-              color: CyberTheme.limeGreen,
-              backgroundColor: CyberTheme.cream,
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(color: ReShotDesignSystem.neonLime, strokeWidth: 6),
+          const SizedBox(height: 24),
+          Text(
+            'LOADING ARCHIVES...',
+            style: ReShotDesignSystem.textTheme.titleLarge!.copyWith(color: ReShotDesignSystem.neonLime),
+          ),
+        ],
       ),
     );
   }
@@ -148,50 +136,40 @@ class _GalleryScreenState extends State<GalleryScreen> {
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(28),
+        padding: const EdgeInsets.all(32),
         child: Container(
-          padding: const EdgeInsets.all(28),
-          decoration: CyberTheme.cartoonCard,
+          padding: const EdgeInsets.all(32),
+          decoration: ReShotDesignSystem.streetPopCard.copyWith(color: ReShotDesignSystem.darkSurface),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('📸', style: TextStyle(fontSize: 64)),
-              const SizedBox(height: 16),
+              const Text('☠️', style: TextStyle(fontSize: 80)),
+              const SizedBox(height: 24),
               Text(
-                'No shots yet!',
-                style: GoogleFonts.boogaloo(fontSize: 22, color: CyberTheme.inkBlack),
+                'NO SHOTS YET',
+                style: ReShotDesignSystem.textTheme.displayMedium!.copyWith(color: Colors.white),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
-                'Launch Director Camera, align with a spot, and capture your first perfect shot!',
-                style: GoogleFonts.nunito(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF888888),
-                  height: 1.5,
-                ),
+                'Hit the streets and start capturing.',
+                style: ReShotDesignSystem.textTheme.bodyLarge!.copyWith(color: Colors.white70),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              GestureDetector(
+              const SizedBox(height: 32),
+              MotionSystem.elasticBounce(
                 onTap: () => Navigator.pop(context),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: CyberTheme.hotPink,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: CyberTheme.outlineBlack, width: 3),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: CyberTheme.outlineBlack,
-                        offset: Offset(4, 4),
-                        blurRadius: 0,
-                      ),
-                    ],
+                    color: ReShotDesignSystem.neonLime,
+                    border: ReShotDesignSystem.brutalistBorder,
                   ),
-                  child: Text(
-                    '🏠 Go to Dashboard',
-                    style: GoogleFonts.boogaloo(fontSize: 16, color: Colors.white),
+                  child: Center(
+                    child: Text(
+                      'BACK TO RADAR',
+                      style: ReShotDesignSystem.textTheme.titleLarge!.copyWith(color: ReShotDesignSystem.inkBlack),
+                    ),
                   ),
                 ),
               ),
@@ -204,128 +182,114 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   Widget _buildGalleryGrid() {
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       physics: const BouncingScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 0.68,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 24,
+        childAspectRatio: 0.65,
       ),
       itemCount: _captures.length,
       itemBuilder: (context, index) {
         final capture = _captures[index];
         final badgeColor = _getBadgeColor(capture.score);
-        final badgeLabel = _getBadgeTier(capture.score);
-        // Slight random tilt for polaroid feel
-        final tiltAngle = (index % 3 == 1) ? 0.02 : (index % 3 == 2) ? -0.015 : 0.0;
+        final badgeLabel = _getBadgeLabel(capture.score);
+        
+        // Random slight rotation for that chaotic sticker-bomb look
+        final isEven = index % 2 == 0;
+        final rotation = isEven ? 0.03 : -0.02;
 
         return Transform.rotate(
-          angle: tiltAngle,
-          child: _PolaroidCard(
-            capture: capture,
-            badgeColor: badgeColor,
-            badgeLabel: badgeLabel,
-          ),
-        );
-      },
-    );
-  }
-
-
-
-}
-
-// ─── Polaroid Card ────────────────────────────────────────────────────────────
-class _PolaroidCard extends StatefulWidget {
-  final ReShotCaptureModel capture;
-  final Color badgeColor;
-  final String badgeLabel;
-
-  const _PolaroidCard({
-    required this.capture,
-    required this.badgeColor,
-    required this.badgeLabel,
-  });
-
-  @override
-  State<_PolaroidCard> createState() => _PolaroidCardState();
-}
-
-class _PolaroidCardState extends State<_PolaroidCard> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTap: () async {
-        await ShareCardWidget.captureAndShare(context, widget.capture);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 100),
-        transform: _pressed
-            ? (Matrix4.identity()..translate(4.0, 4.0))
-            : Matrix4.identity(),
-        decoration: BoxDecoration(
-          color: CyberTheme.cardWhite,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: CyberTheme.outlineBlack, width: 3),
-          boxShadow: _pressed
-              ? []
-              : const [
-                  BoxShadow(
-                    color: CyberTheme.outlineBlack,
-                    offset: Offset(5, 5),
-                    blurRadius: 0,
-                  ),
-                ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Photo frame
-            Expanded(
+          angle: rotation,
+          child: MotionSystem.elasticBounce(
+            onTap: () async {
+              MotionSystem.triggerImpactShake();
+              await ShareCardWidget.captureAndShare(context, capture);
+            },
+            child: Container(
+              decoration: ReShotDesignSystem.streetPopCard.copyWith(
+                color: ReShotDesignSystem.cardWhite,
+              ),
               child: Stack(
-                fit: StackFit.expand,
+                clipBehavior: Clip.none,
                 children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
-                    child: kIsWeb || widget.capture.filePath.startsWith('http')
-                        ? Image.network(
-                            widget.capture.filePath,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: const Color(0xFFEEEEEE),
-                              child: const Center(child: Text('🖼️', style: TextStyle(fontSize: 32))),
-                            ),
-                          )
-                        : Image.file(
-                            File(widget.capture.filePath),
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: const Color(0xFFEEEEEE),
-                              child: const Center(child: Text('🖼️', style: TextStyle(fontSize: 32))),
-                            ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            border: ReShotDesignSystem.brutalistBorder,
+                            color: ReShotDesignSystem.inkBlack,
                           ),
-                  ),
-                  // Score badge overlay
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: widget.badgeColor,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.black, width: 2),
+                          child: kIsWeb || capture.filePath.startsWith('http')
+                              ? Image.network(
+                                  capture.filePath,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white54),
+                                )
+                              : Image.file(
+                                  File(capture.filePath),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white54),
+                                ),
+                        ),
                       ),
-                      child: Text(
-                        '${widget.capture.displayScore}%',
-                        style: GoogleFonts.boogaloo(
-                          fontSize: 12,
-                          color: CyberTheme.inkBlack,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              capture.locationName.toUpperCase(),
+                              style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
+                                color: ReShotDesignSystem.inkBlack,
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${capture.displayScore}% MATCH',
+                              style: ReShotDesignSystem.textTheme.bodyLarge!.copyWith(
+                                color: ReShotDesignSystem.hotPink,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  // Anime Sticker Badge
+                  Positioned(
+                    top: -10,
+                    right: -10,
+                    child: Transform.rotate(
+                      angle: 0.15,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: badgeColor,
+                          border: ReShotDesignSystem.brutalistBorder,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: ReShotDesignSystem.inkBlack,
+                              offset: Offset(3, 3),
+                              blurRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          badgeLabel,
+                          style: ReShotDesignSystem.textTheme.titleSmall!.copyWith(
+                            color: badgeColor == ReShotDesignSystem.inkBlack ? Colors.white : ReShotDesignSystem.inkBlack,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
                     ),
@@ -333,44 +297,9 @@ class _PolaroidCardState extends State<_PolaroidCard> {
                 ],
               ),
             ),
-            // Polaroid label area
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.capture.locationName,
-                    style: GoogleFonts.boogaloo(
-                      fontSize: 13,
-                      color: CyberTheme.inkBlack,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: widget.badgeColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: widget.badgeColor, width: 1.5),
-                    ),
-                    child: Text(
-                      widget.badgeLabel,
-                      style: GoogleFonts.nunito(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: widget.badgeColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
