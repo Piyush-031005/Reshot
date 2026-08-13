@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../theme/cyber_theme.dart';
+import '../theme/design_system.dart';
 
 class CompositionOverlayPainter extends CustomPainter {
   final double pitch;
@@ -22,7 +22,7 @@ class CompositionOverlayPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final themeColor = isAligned ? CyberTheme.limeGreen : CyberTheme.hotPink;
+    final themeColor = isAligned ? ReShotDesignSystem.neonLime : ReShotDesignSystem.hotPink;
 
     _drawGrid(canvas, size);
     _drawTiltIndicator(canvas, center, themeColor);

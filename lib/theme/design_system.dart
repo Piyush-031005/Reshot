@@ -14,7 +14,8 @@ class ReShotDesignSystem {
   static const Color creamBg = Color(0xFFFFF8F0);
   static const Color darkBg = Color(0xFF0D0F12);
   static const Color inkBlack = Color(0xFF121212);
-  static const Color cardWhite = Color(0xFFFFFFFF);
+  static const Color cardWhite = Color(0xFFF8F5F2); // Off-white for stickers/cards
+  static const Color darkSurface = Color(0xFF15181F); // tactical HUD background Neons
   
   // Brand Neons
   static const Color neonLime = Color(0xFFB8FF00);

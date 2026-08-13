@@ -10,7 +10,8 @@ import 'package:uuid/uuid.dart';
 import '../models/location_model.dart';
 import '../models/reshot_capture_model.dart';
 import '../providers/repository_provider.dart';
-import '../theme/cyber_theme.dart';
+import '../theme/design_system.dart';
+import '../theme/motion_system.dart';
 import '../widgets/composition_overlay_painter.dart';
 
 class DirectorCameraScreen extends StatefulWidget {
@@ -207,7 +208,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
             'Failed to save photo! Check storage permissions.',
             style: GoogleFonts.nunito(fontWeight: FontWeight.w800),
           ),
-          backgroundColor: CyberTheme.hotPink,
+          backgroundColor: ReShotDesignSystem.hotPink,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -215,157 +216,85 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
   }
 
   void _showCaptureSuccessDialog() {
-    // Fix 1: mounted check before showDialog.
     if (!mounted) return;
+
+    // Trigger haptic impact
+    MotionSystem.triggerImpactShake();
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: CyberTheme.outlineBlack, width: 4),
-            boxShadow: const [
-              BoxShadow(
-                color: CyberTheme.outlineBlack,
-                offset: Offset(8, 8),
-                blurRadius: 0,
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: CyberTheme.limeGreen,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-                  border: const Border(
-                    bottom: BorderSide(color: CyberTheme.outlineBlack, width: 3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Text('🎉', style: TextStyle(fontSize: 28)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'PERFECT SHOT!',
-                        style: GoogleFonts.boogaloo(
-                          fontSize: 22,
-                          color: CyberTheme.inkBlack,
+        child: MotionSystem.comicStamp(
+          isVisible: true,
+          child: Container(
+            decoration: ReShotDesignSystem.streetPopCard,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Photo preview (Polaroid style)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: ReShotDesignSystem.cardWhite,
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 280,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: ReShotDesignSystem.brutalistBorder,
+                          color: ReShotDesignSystem.inkBlack,
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Photo preview
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 220,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: CyberTheme.outlineBlack, width: 4),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: CyberTheme.outlineBlack,
-                            offset: Offset(8, 8),
-                            blurRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(13),
                         child: _capturedFile != null
                             ? (kIsWeb || _capturedFile!.path.startsWith('http')
                                 ? Image.network(_capturedFile!.path, fit: BoxFit.cover)
                                 : Image.file(File(_capturedFile!.path), fit: BoxFit.cover))
-                            : Container(
-                                color: const Color(0xFFEEEEEE),
-                                child: const Center(child: Text('📷', style: TextStyle(fontSize: 48))),
-                              ),
+                            : const Center(child: Text('📷', style: TextStyle(fontSize: 48))),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Score badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: CyberTheme.inkBlack,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('🎯', style: TextStyle(fontSize: 18)),
-                          const SizedBox(width: 8),
-                          Text(
-                            'MATCH: $_displayScore%',
-                            style: GoogleFonts.boogaloo(
-                              fontSize: 18,
-                              color: CyberTheme.limeGreen,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Saved to your gallery! Great work! 🌟',
-                      style: GoogleFonts.nunito(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF666666),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    // Return button
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        if (mounted) Navigator.pop(context);
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: CyberTheme.hotPink,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: CyberTheme.outlineBlack, width: 3),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: CyberTheme.outlineBlack,
-                              offset: Offset(4, 4),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            '🏠 BACK TO HOME',
-                            style: GoogleFonts.boogaloo(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'PERFECT SHOT!',
+                        style: ReShotDesignSystem.textTheme.displayMedium!.copyWith(
+                          color: ReShotDesignSystem.hotPink,
+                          letterSpacing: 2,
                         ),
                       ),
-                    ),
-                  ],
+                      Text(
+                        'MATCH: $_displayScore%',
+                        style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
+                          color: ReShotDesignSystem.inkBlack,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                // Return button
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    if (mounted) Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    decoration: BoxDecoration(
+                      color: ReShotDesignSystem.neonLime,
+                      border: const Border(top: BorderSide(color: ReShotDesignSystem.inkBlack, width: 4)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '🏠 RETURN TO BASE',
+                        style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
+                          color: ReShotDesignSystem.inkBlack,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -375,14 +304,14 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CyberTheme.darkBg,
+      backgroundColor: ReShotDesignSystem.darkBg,
       body: SafeArea(
         child: Column(
           children: [
             // Top HUD Bar
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              color: CyberTheme.darkBg,
+              color: ReShotDesignSystem.darkBg,
               child: Row(
                 children: [
                   // Back button
@@ -414,8 +343,8 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: _activeState == 'lock'
-                          ? CyberTheme.limeGreen
-                          : CyberTheme.hotPink,
+                          ? ReShotDesignSystem.neonLime
+                          : ReShotDesignSystem.hotPink,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.black, width: 2),
                     ),
@@ -424,7 +353,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                       style: GoogleFonts.nunito(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: CyberTheme.inkBlack,
+                        color: ReShotDesignSystem.inkBlack,
                       ),
                     ),
                   ),
@@ -441,7 +370,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                     SizedBox.expand(child: CameraPreview(_controller!))
                   else
                     Container(
-                      color: CyberTheme.cyberBlack,
+                      color: ReShotDesignSystem.darkBg,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
@@ -459,7 +388,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                             children: [
                               const Icon(
                                 Icons.videocam_outlined,
-                                color: CyberTheme.limeGreen,
+                                color: ReShotDesignSystem.neonLime,
                                 size: 48,
                               ),
                               const SizedBox(height: 10),
@@ -467,7 +396,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                                 'SIMULATING LIVE FEED',
                                 style: GoogleFonts.pressStart2p(
                                   fontSize: 10,
-                                  color: CyberTheme.limeGreen,
+                                  color: ReShotDesignSystem.neonLime,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -504,8 +433,8 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: _isAligned
-                            ? CyberTheme.limeGreen.withValues(alpha: 0.95)
-                            : CyberTheme.hotPink.withValues(alpha: 0.95),
+                            ? ReShotDesignSystem.neonLime.withValues(alpha: 0.95)
+                            : ReShotDesignSystem.hotPink.withValues(alpha: 0.95),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: Colors.black, width: 3),
                         boxShadow: const [
@@ -532,7 +461,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                                   _isAligned ? 'PERFECT!' : 'ALIGN IT',
                                   style: GoogleFonts.boogaloo(
                                     fontSize: 14,
-                                    color: CyberTheme.inkBlack,
+                                    color: ReShotDesignSystem.inkBlack,
                                   ),
                                 ),
                                 Text(
@@ -540,7 +469,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                                   style: GoogleFonts.nunito(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: CyberTheme.inkBlack.withValues(alpha: 0.8),
+                                    color: ReShotDesignSystem.inkBlack.withValues(alpha: 0.8),
                                   ),
                                 ),
                               ],
@@ -550,14 +479,14 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
-                              color: CyberTheme.inkBlack,
+                              color: ReShotDesignSystem.inkBlack,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
                               '$_displayScore%',
                               style: GoogleFonts.boogaloo(
                                 fontSize: 18,
-                                color: _isAligned ? CyberTheme.limeGreen : Colors.white,
+                                color: _isAligned ? ReShotDesignSystem.neonLime : Colors.white,
                               ),
                             ),
                           ),
@@ -576,7 +505,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
             // Bottom Controller Bar
             Container(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-              color: CyberTheme.darkSurface,
+              color: ReShotDesignSystem.darkSurface,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -601,9 +530,9 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                         Expanded(
                           child: SliderTheme(
                             data: SliderTheme.of(context).copyWith(
-                              activeTrackColor: CyberTheme.hotPink,
+                              activeTrackColor: ReShotDesignSystem.hotPink,
                               inactiveTrackColor: Colors.white12,
-                              thumbColor: CyberTheme.hotPink,
+                              thumbColor: ReShotDesignSystem.hotPink,
                               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
                               overlayShape: SliderComponentShape.noOverlay,
                             ),
@@ -627,9 +556,9 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                         Expanded(
                           child: SliderTheme(
                             data: SliderTheme.of(context).copyWith(
-                              activeTrackColor: CyberTheme.hotPink,
+                              activeTrackColor: ReShotDesignSystem.hotPink,
                               inactiveTrackColor: Colors.white12,
-                              thumbColor: CyberTheme.hotPink,
+                              thumbColor: ReShotDesignSystem.hotPink,
                               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
                               overlayShape: SliderComponentShape.noOverlay,
                             ),
@@ -656,7 +585,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         decoration: BoxDecoration(
-                          color: CyberTheme.limeGreen,
+                          color: ReShotDesignSystem.neonLime,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(color: Colors.black, width: 3),
                           boxShadow: const [
@@ -668,7 +597,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                             '🔒 LOCK & HAND OVER',
                             style: GoogleFonts.boogaloo(
                               fontSize: 16,
-                              color: CyberTheme.inkBlack,
+                              color: ReShotDesignSystem.inkBlack,
                             ),
                           ),
                         ),
@@ -679,9 +608,9 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: CyberTheme.hotPink.withValues(alpha: 0.15),
+                        color: ReShotDesignSystem.hotPink.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: CyberTheme.hotPink, width: 2),
+                        border: Border.all(color: ReShotDesignSystem.hotPink, width: 2),
                       ),
                       child: Row(
                         children: [
@@ -695,7 +624,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                                   'HANDED OVER!',
                                   style: GoogleFonts.boogaloo(
                                     fontSize: 14,
-                                    color: CyberTheme.hotPink,
+                                    color: ReShotDesignSystem.hotPink,
                                   ),
                                 ),
                                 Text(
@@ -749,7 +678,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                             width: 64,
                             height: 64,
                             decoration: BoxDecoration(
-                              color: _isAligned ? CyberTheme.limeGreen : const Color(0xFF333333),
+                              color: _isAligned ? ReShotDesignSystem.neonLime : const Color(0xFF333333),
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: _isAligned ? Colors.black : Colors.white30,
