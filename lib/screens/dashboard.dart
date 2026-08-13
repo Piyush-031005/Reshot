@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
+import 'dart:async';
 import '../models/hidden_gem_model.dart';
 import '../models/location_model.dart';
 import '../providers/repository_provider.dart';
@@ -27,6 +29,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   List<HiddenGemModel> _filteredGems = [];
   late HiddenGemModel _selectedGem;
   bool _isLoading = true;
+  Position? _currentPosition;
+  StreamSubscription<Position>? _positionStream;
 
   late final AnimationController _bannerController;
   late final Animation<double> _bannerBounce;
@@ -50,6 +54,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   void initState() {
     super.initState();
     _loadGems();
+    _startLocationTracking();
     _searchController.addListener(_applyFilters);
 
     _bannerController = AnimationController(
@@ -69,6 +74,44 @@ class _DashboardScreenState extends State<DashboardScreen>
     _bannerPulse = Tween<double>(begin: 1.0, end: 1.015).animate(
       CurvedAnimation(parent: _bannerPulseController, curve: Curves.easeInOutSine),
     );
+  }
+
+  @override
+  void dispose() {
+    _positionStream?.cancel();
+    _bannerController.dispose();
+    _bannerPulseController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _startLocationTracking() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+
+    if (permission == LocationPermission.deniedForever) return;
+
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 5, // update every 5 meters
+      ),
+    ).listen((Position position) {
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+        });
+      }
+    });
   }
 
   Future<void> _loadGems() async {
@@ -581,10 +624,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '⬆ ${_selectedGem.altitude}m',
+                    _currentPosition != null 
+                        ? '🧭 ${(Geolocator.distanceBetween(_currentPosition!.latitude, _currentPosition!.longitude, _selectedGem.latitude, _selectedGem.longitude)).toStringAsFixed(0)}m'
+                        : '🧭 LOCATING...',
                     style: GoogleFonts.nunito(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                       color: CyberTheme.inkBlack,
                     ),
                   ),
