@@ -5,6 +5,8 @@ import '../models/hidden_gem_model.dart';
 import '../models/location_model.dart';
 import '../providers/repository_provider.dart';
 import '../theme/cyber_theme.dart';
+import '../theme/design_system.dart';
+import '../theme/motion_system.dart';
 import 'director_camera_screen.dart';
 import 'create_gem_screen.dart';
 import 'gallery_screen.dart';
@@ -114,7 +116,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CyberTheme.cream,
+      backgroundColor: ReShotDesignSystem.creamBg,
       appBar: _buildAppBar(),
       body: _isLoading
           ? _buildLoadingState()
@@ -124,13 +126,13 @@ class _DashboardScreenState extends State<DashboardScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Hero Banner
-                  ScaleTransition(
-                    scale: _bannerBounce,
-                    child: ScaleTransition(
-                      scale: _bannerPulse,
-                      child: _buildHeroBanner(),
-                    ),
+                  // Hero Banner (Street Pop)
+                  MotionSystem.elasticBounce(
+                    scaleDown: 0.95,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                    },
+                    child: _buildHeroBanner(),
                   ),
                   const SizedBox(height: 28),
 
@@ -163,57 +165,50 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: CyberTheme.cream,
+      backgroundColor: ReShotDesignSystem.creamBg,
       elevation: 0,
       centerTitle: true,
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: CyberTheme.limeGreen,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: CyberTheme.outlineBlack, width: 2.5),
-              boxShadow: const [
-                BoxShadow(
-                  color: CyberTheme.outlineBlack,
-                  offset: Offset(3, 3),
-                  blurRadius: 0,
-                ),
-              ],
+              color: ReShotDesignSystem.neonLime,
+              borderRadius: BorderRadius.circular(12),
+              border: ReShotDesignSystem.brutalistBorder,
+              boxShadow: ReShotDesignSystem.brutalistShadow,
             ),
             child: const Center(
-              child: Text('📷', style: TextStyle(fontSize: 16)),
+              child: Text('📷', style: TextStyle(fontSize: 18)),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Text(
             'ReSHOT',
-            style: GoogleFonts.boogaloo(
-              fontSize: 24,
-              color: CyberTheme.inkBlack,
-              letterSpacing: 1.5,
+            style: ReShotDesignSystem.textTheme.displayMedium!.copyWith(
+              color: ReShotDesignSystem.inkBlack,
+              letterSpacing: 2,
             ),
           ),
         ],
       ),
       actions: [
-        _buildAppBarIcon(Icons.account_circle_rounded, CyberTheme.electricBlue, () async {
+        _buildAppBarIcon(Icons.account_circle_rounded, ReShotDesignSystem.cyberCyan, () async {
           await Navigator.push(
             context,
             MaterialPageRoute(builder: (c) => const ProfileScreen()),
           );
           _loadGems();
         }),
-        _buildAppBarIcon(Icons.photo_library_rounded, CyberTheme.hotPink, () {
+        _buildAppBarIcon(Icons.photo_library_rounded, ReShotDesignSystem.hotPink, () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (c) => const GalleryScreen()),
           );
         }),
-        _buildAppBarIcon(Icons.add_location_alt_rounded, CyberTheme.sunOrange, () async {
+        _buildAppBarIcon(Icons.add_location_alt_rounded, ReShotDesignSystem.sunOrange, () async {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (c) => const CreateGemScreen()),
@@ -274,8 +269,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget _buildHeroBanner() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: CyberTheme.pinkCartoonCard,
+      padding: const EdgeInsets.all(24),
+      decoration: ReShotDesignSystem.streetPopColoredCard(ReShotDesignSystem.hotPink),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -285,19 +280,17 @@ class _DashboardScreenState extends State<DashboardScreen>
               children: [
                 Text(
                   '📸 RECREATE ANY PHOTO',
-                  style: GoogleFonts.boogaloo(
-                    fontSize: 26, // Massive typography
-                    color: CyberTheme.cardWhite,
-                    letterSpacing: 0.5,
+                  style: ReShotDesignSystem.textTheme.displaySmall!.copyWith(
+                    color: ReShotDesignSystem.cardWhite,
+                    letterSpacing: 1,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   'FRAME IT. LOCK IT. HAND IT OVER.\nRESHOT AUTO-CAPTURES WHEN ALIGNED!',
-                  style: GoogleFonts.nunito(
-                    fontSize: 14,
+                  style: ReShotDesignSystem.textTheme.bodyLarge!.copyWith(
+                    color: ReShotDesignSystem.cardWhite,
                     fontWeight: FontWeight.w900,
-                    color: CyberTheme.cardWhite,
                   ),
                 ),
               ],
@@ -305,13 +298,13 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           const SizedBox(width: 12),
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: CyberTheme.cardWhite,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: CyberTheme.outlineBlack, width: 2.5),
+              color: ReShotDesignSystem.cardWhite,
+              borderRadius: BorderRadius.circular(16),
+              border: ReShotDesignSystem.brutalistBorder,
             ),
-            child: const Text('🎯', style: TextStyle(fontSize: 28)),
+            child: const Text('🎯', style: TextStyle(fontSize: 32)),
           ),
         ],
       ),
@@ -319,12 +312,18 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Widget _buildSectionLabel(String label) {
-    return Text(
-      label,
-      style: GoogleFonts.boogaloo(
-        fontSize: 18,
-        color: CyberTheme.inkBlack,
-        letterSpacing: 0.5,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: ReShotDesignSystem.inkBlack,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
+          color: ReShotDesignSystem.cardWhite,
+          letterSpacing: 1,
+        ),
       ),
     );
   }
@@ -705,7 +704,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 }
 
 // ─── Reusable Pressable Card ──────────────────────────────────────────────────
-class _PressableCard extends StatefulWidget {
+class _PressableCard extends StatelessWidget {
   final Widget child;
   final BoxDecoration decoration;
   final VoidCallback? onTap;
@@ -719,39 +718,26 @@ class _PressableCard extends StatefulWidget {
   });
 
   @override
-  State<_PressableCard> createState() => _PressableCardState();
-}
-
-class _PressableCardState extends State<_PressableCard> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      onDoubleTap: widget.onDoubleTap,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 80),
-        transform: _pressed
-            ? (Matrix4.identity()..translate(4.0, 4.0))
-            : Matrix4.identity(),
-        padding: const EdgeInsets.all(14),
-        decoration: _pressed
-            ? widget.decoration.copyWith(
-                boxShadow: const [],
-              )
-            : widget.decoration,
-        child: widget.child,
+    return MotionSystem.elasticBounce(
+      onTap: () {
+        if (onTap != null) onTap!();
+      },
+      scaleDown: 0.95,
+      child: GestureDetector(
+        onDoubleTap: onDoubleTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: decoration,
+          child: child,
+        ),
       ),
     );
   }
 }
 
 // ─── Reusable Pressable Button ────────────────────────────────────────────────
-class _PressableButton extends StatefulWidget {
+class _PressableButton extends StatelessWidget {
   final Widget child;
   final Color color;
   final VoidCallback? onTap;
@@ -763,48 +749,24 @@ class _PressableButton extends StatefulWidget {
   });
 
   @override
-  State<_PressableButton> createState() => _PressableButtonState();
-}
-
-class _PressableButtonState extends State<_PressableButton> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 80),
-        transform: _pressed
-            ? (Matrix4.identity()..translate(8.0, 8.0))
-            : Matrix4.identity(),
+    return MotionSystem.elasticBounce(
+      onTap: () {
+        if (onTap != null) onTap!();
+      },
+      scaleDown: 0.92,
+      child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: widget.color,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: CyberTheme.outlineBlack, width: 4),
-          boxShadow: _pressed
-              ? []
-              : const [
-                  BoxShadow(
-                    color: CyberTheme.outlineBlack,
-                    offset: Offset(8, 8),
-                    blurRadius: 0,
-                  ),
-                ],
-        ),
-        child: widget.child,
+        decoration: ReShotDesignSystem.streetPopColoredCard(color),
+        child: child,
       ),
     );
   }
 }
 
-// ─── Camera Mode Card ─────────────────────────────────────────────────────────
-class _CameraModeCard extends StatefulWidget {
+// ─── Camera Mode Card (Tarot Card Style) ───────────────────────────────────────
+class _CameraModeCard extends StatelessWidget {
   final String emoji;
   final String title;
   final String subtitle;
@@ -820,68 +782,36 @@ class _CameraModeCard extends StatefulWidget {
   });
 
   @override
-  State<_CameraModeCard> createState() => _CameraModeCardState();
-}
-
-class _CameraModeCardState extends State<_CameraModeCard> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 80),
-        transform: _pressed
-            ? (Matrix4.identity()..translate(8.0, 8.0))
-            : Matrix4.identity(),
+    return MotionSystem.elasticBounce(
+      onTap: onTap,
+      scaleDown: 0.95,
+      child: Container(
         padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: CyberTheme.cardWhite,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: CyberTheme.outlineBlack, width: 4),
-          boxShadow: _pressed
-              ? []
-              : const [
-                  BoxShadow(
-                    color: CyberTheme.outlineBlack,
-                    offset: Offset(8, 8),
-                    blurRadius: 0,
-                  ),
-                ],
-        ),
+        decoration: ReShotDesignSystem.streetPopCard,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: widget.accentColor.withValues(alpha: 0.15),
+                color: accentColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: widget.accentColor, width: 2.5),
+                border: Border.all(color: accentColor, width: 2.5),
               ),
-              child: Text(widget.emoji, style: const TextStyle(fontSize: 24)),
+              child: Text(emoji, style: const TextStyle(fontSize: 24)),
             ),
             const SizedBox(height: 14),
             Text(
-              widget.title,
-              style: GoogleFonts.boogaloo(
-                fontSize: 20, // Increased size
-                color: CyberTheme.inkBlack,
+              title,
+              style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
                 height: 1.1,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              widget.subtitle,
-              style: GoogleFonts.nunito(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF888888),
-              ),
+              subtitle,
+              style: ReShotDesignSystem.textTheme.bodySmall,
             ),
           ],
         ),
