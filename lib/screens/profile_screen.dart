@@ -77,7 +77,14 @@ class _ProfileScreenState extends State<ProfileScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    
+    // Initial load
     _loadDerivedStats();
+    
+    // Listen for new captures or gem additions
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AppRepositoryProvider>().addListener(_loadDerivedStats);
+    });
   }
 
   Future<void> _loadDerivedStats() async {
@@ -115,6 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   void dispose() {
+    context.read<AppRepositoryProvider>().removeListener(_loadDerivedStats);
     _tabController.dispose();
     super.dispose();
   }

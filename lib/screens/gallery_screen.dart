@@ -25,6 +25,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
   void initState() {
     super.initState();
     _loadCaptures();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AppRepositoryProvider>().addListener(_loadCaptures);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    context.read<AppRepositoryProvider>().removeListener(_loadCaptures);
+    super.dispose();
   }
 
   Future<void> _loadCaptures() async {
