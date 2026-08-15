@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
+import '../widgets/cartoon_widgets.dart';
+import 'recreation_card_screen.dart';
 import '../models/location_model.dart';
 import '../models/reshot_capture_model.dart';
 import '../providers/repository_provider.dart';
@@ -142,6 +144,26 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
     }
   }
 
+  String _getGuidanceText() {
+    if (_isAligned) return 'Hold steady...';
+    
+    // Pitch is up/down tilt. Ideal is 0.
+    if (_pitch > 1.5) return 'Tilt phone down slightly 👇';
+    if (_pitch < -1.5) return 'Tilt phone up slightly 👆';
+    
+    // Roll is side-to-side twist. Ideal is 9.8 (upright).
+    if (_roll > 10.5) return 'Level phone left 👈';
+    if (_roll < 9.0) return 'Level phone right 👉';
+
+    // Position & Scale (simulated by sliders right now, ideal 50/100)
+    if (_posX < 45) return 'Move camera right 👉';
+    if (_posX > 55) return 'Move camera left 👈';
+    if (_scale < 95) return 'Move closer to subject 🚶‍♂️';
+    if (_scale > 105) return 'Step back from subject 🚶‍♀️';
+
+    return 'Almost there...';
+  }
+
   void _triggerAutoShutter() {
     _shutterTimer?.cancel();
     _shutterTimer = Timer(const Duration(milliseconds: 1200), () async {
@@ -224,86 +246,19 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
   }
 
   void _showCaptureSuccessDialog() {
-    if (!mounted) return;
+    if (!mounted || _capturedFile == null) return;
 
     // Trigger haptic impact
     MotionSystem.triggerImpactShake();
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: MotionSystem.comicStamp(
-          isVisible: true,
-          child: Container(
-            decoration: ReShotDesignSystem.streetPopCard,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Photo preview (Polaroid style)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  color: ReShotDesignSystem.cardWhite,
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 280,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          border: ReShotDesignSystem.brutalistBorder,
-                          color: ReShotDesignSystem.inkBlack,
-                        ),
-                        child: _capturedFile != null
-                            ? (kIsWeb || _capturedFile!.path.startsWith('http')
-                                ? Image.network(_capturedFile!.path, fit: BoxFit.cover)
-                                : Image.file(File(_capturedFile!.path), fit: BoxFit.cover))
-                            : const Center(child: Text('📷', style: TextStyle(fontSize: 48))),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'PERFECT SHOT!',
-                        style: ReShotDesignSystem.textTheme.displayMedium!.copyWith(
-                          color: ReShotDesignSystem.hotPink,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                      Text(
-                        'MATCH: $_displayScore%',
-                        style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
-                          color: ReShotDesignSystem.inkBlack,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Return button
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    if (mounted) Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: BoxDecoration(
-                      color: ReShotDesignSystem.neonLime,
-                      border: const Border(top: BorderSide(color: ReShotDesignSystem.inkBlack, width: 4)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '🏠 RETURN TO BASE',
-                        style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
-                          color: ReShotDesignSystem.inkBlack,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecreationCardScreen(
+          originalImagePath: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=800&fit=crop', // Hardcoded reference for MVP
+          capturedImagePath: _capturedFile!.path,
+          matchScore: _displayScore,
+          locationName: widget.targetGem.name,
         ),
       ),
     );
@@ -583,58 +538,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // POS Slider
-                    Row(
-                      children: [
-                        Text(
-                          'POS',
-                          style: GoogleFonts.boogaloo(fontSize: 13, color: Colors.white60),
-                        ),
-                        Expanded(
-                          child: SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              activeTrackColor: ReShotDesignSystem.hotPink,
-                              inactiveTrackColor: Colors.white12,
-                              thumbColor: ReShotDesignSystem.hotPink,
-                              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
-                              overlayShape: SliderComponentShape.noOverlay,
-                            ),
-                            child: Slider(
-                              value: _posX,
-                              min: 0,
-                              max: 100,
-                              onChanged: (val) => setState(() { _posX = val; _calculateScore(); }),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    // SCALE Slider
-                    Row(
-                      children: [
-                        Text(
-                          'ZOOM',
-                          style: GoogleFonts.boogaloo(fontSize: 13, color: Colors.white60),
-                        ),
-                        Expanded(
-                          child: SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              activeTrackColor: ReShotDesignSystem.hotPink,
-                              inactiveTrackColor: Colors.white12,
-                              thumbColor: ReShotDesignSystem.hotPink,
-                              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
-                              overlayShape: SliderComponentShape.noOverlay,
-                            ),
-                            child: Slider(
-                              value: _scale,
-                              min: 50,
-                              max: 150,
-                              onChanged: (val) => setState(() { _scale = val; _calculateScore(); }),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // The POS and ZOOM sliders were removed to simplify the Smart Coach UI
                     const SizedBox(height: 12),
                     // Lock & Handover button
                     GestureDetector(
@@ -774,29 +678,6 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
         ),
       ),
     );
-  }
-
-  String _getGuidanceText() {
-    if (_rawScore >= 92.0) {
-      return 'TARGET ACQUIRED! HOLD STEADY...';
-    }
-    if (_pitch.abs() > 1.5) {
-      return _pitch > 0 ? '← TILT PHONE RIGHT' : 'TILT PHONE LEFT →';
-    }
-    double rollDiff = _roll.abs() - 9.8;
-    if (rollDiff.abs() > 1.5) {
-      return rollDiff > 0 ? '↓ TILT PHONE FORWARD' : 'TILT PHONE BACKWARD ↑';
-    }
-    if (_posX < 45) {
-      return '← MOVE DEVICE RIGHT';
-    } else if (_posX > 55) {
-      return 'MOVE DEVICE LEFT →';
-    } else if (_scale < 90) {
-      return '🔎 STEP CLOSER';
-    } else if (_scale > 110) {
-      return '🔎 STEP BACK';
-    }
-    return '🎯 ALIGNING Composition...';
   }
 
   @override
