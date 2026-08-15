@@ -12,6 +12,7 @@ import '../theme/design_system.dart';
 import '../theme/motion_system.dart';
 import 'director_camera_screen.dart';
 import 'create_gem_screen.dart';
+import 'image_upload_screen.dart';
 import 'gallery_screen.dart';
 import 'gem_detail_screen.dart';
 import 'profile_screen.dart';
@@ -175,6 +176,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                     scaleDown: 0.95,
                     onTap: () {
                       HapticFeedback.lightImpact();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (c) => const ImageUploadScreen()),
+                      );
                     },
                     child: _buildHeroBanner(),
                   ),
