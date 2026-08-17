@@ -99,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen>
     _pillFades = List.generate(3, (i) {
       return CurvedAnimation(
         parent: _pillController,
-        curve: Interval(i * 0.25, i * 0.25 + 0.55, curve: Curves.easeOut),
+        curve: Interval(i * 0.2, (i * 0.2 + 0.55).clamp(0.0, 1.0), curve: Curves.easeOut),
       );
     });
     _pillSlides = List.generate(3, (i) {
@@ -108,7 +108,7 @@ class _SplashScreenState extends State<SplashScreen>
         end: Offset.zero,
       ).animate(CurvedAnimation(
         parent: _pillController,
-        curve: Interval(i * 0.2, i * 0.2 + 0.6, curve: Curves.easeOutBack),
+        curve: Interval(i * 0.2, (i * 0.2 + 0.6).clamp(0.0, 1.0), curve: Curves.easeOutBack),
       ));
     });
 
