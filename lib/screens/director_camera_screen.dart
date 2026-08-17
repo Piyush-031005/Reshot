@@ -294,8 +294,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                   Expanded(
                     child: Text(
                       widget.mode == 'director' ? '🎬 DIRECTOR CAMERA' : '🏔️ LANDMARK ECHO',
-                      style: GoogleFonts.boogaloo(
-                        fontSize: 16,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         color: Colors.white,
                         letterSpacing: 0.5,
                       ),
@@ -313,8 +312,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                     ),
                     child: Text(
                       _activeState == 'lock' ? '① SET COMP' : '② HANDED OVER',
-                      style: GoogleFonts.nunito(
-                        fontSize: 11,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         fontWeight: FontWeight.w800,
                         color: ReShotDesignSystem.inkBlack,
                       ),
@@ -357,9 +355,9 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                               const SizedBox(height: 10),
                               Text(
                                 'SIMULATING LIVE FEED',
-                                style: GoogleFonts.pressStart2p(
-                                  fontSize: 10,
+                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
                                   color: ReShotDesignSystem.neonLime,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -397,6 +395,9 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                           scale: _scale,
                           isAligned: _isAligned,
                           activeState: _activeState,
+                          detectedPose: widget.location.tips.firstWhere(
+                              (t) => t.startsWith('AI Detected Pose: '),
+                              orElse: () => 'Standing').replaceAll('AI Detected Pose: ', '').trim(),
                         ),
                       ),
                     ),
@@ -477,17 +478,16 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                               children: [
                                 Text(
                                   _isAligned ? 'PERFECT!' : 'ALIGN IT',
-                                  style: GoogleFonts.boogaloo(
-                                    fontSize: 14,
+                                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
                                     color: ReShotDesignSystem.inkBlack,
+                                    fontSize: 18,
                                   ),
                                 ),
                                 Text(
                                   _getGuidanceText(),
-                                  style: GoogleFonts.nunito(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
+                                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
                                     color: ReShotDesignSystem.inkBlack.withValues(alpha: 0.8),
+                                    fontSize: 22, // Caveat needs larger size
                                   ),
                                 ),
                               ],
@@ -502,8 +502,8 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                             ),
                             child: Text(
                               '$_displayScore%',
-                              style: GoogleFonts.boogaloo(
-                                fontSize: 18,
+                              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                                fontSize: 22,
                                 color: _isAligned ? ReShotDesignSystem.neonLime : Colors.white,
                               ),
                             ),
@@ -530,8 +530,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                   if (_activeState == 'lock') ...[
                     Text(
                       '🕹️ DRAG TO COMPOSE',
-                      style: GoogleFonts.nunito(
-                        fontSize: 11,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         fontWeight: FontWeight.w800,
                         color: Colors.white54,
                         letterSpacing: 1,
@@ -562,8 +561,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                         child: Center(
                           child: Text(
                             '🔒 LOCK & HAND OVER',
-                            style: GoogleFonts.boogaloo(
-                              fontSize: 16,
+                            style: Theme.of(context).textTheme.titleMedium!.copyWith(
                               color: ReShotDesignSystem.inkBlack,
                             ),
                           ),
@@ -589,16 +587,14 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                               children: [
                                 Text(
                                   'HANDED OVER!',
-                                  style: GoogleFonts.boogaloo(
-                                    fontSize: 14,
+                                  style: Theme.of(context).textTheme.titleSmall!.copyWith(
                                     color: ReShotDesignSystem.hotPink,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
                                   'Stranger just needs to align — auto-clicks when matched!',
-                                  style: GoogleFonts.nunito(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                                     color: Colors.white70,
                                   ),
                                 ),
@@ -625,13 +621,12 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                                 border: Border.all(color: Colors.white30, width: 2),
                               ),
                               child: Center(
-                                child: Text(
-                                  '↩ RE-COMPOSE',
-                                  style: GoogleFonts.boogaloo(
-                                    fontSize: 13,
-                                    color: Colors.white70,
+                                  child: Text(
+                                    '↩ RE-COMPOSE',
+                                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                                      color: Colors.white70,
+                                    ),
                                   ),
-                                ),
                               ),
                             ),
                           ),

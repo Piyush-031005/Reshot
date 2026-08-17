@@ -9,6 +9,7 @@ class CompositionOverlayPainter extends CustomPainter {
   final double scale;
   final bool isAligned;
   final String activeState;
+  final String detectedPose;
 
   CompositionOverlayPainter({
     required this.pitch,
@@ -17,6 +18,7 @@ class CompositionOverlayPainter extends CustomPainter {
     required this.scale,
     required this.isAligned,
     required this.activeState,
+    required this.detectedPose,
   });
 
   @override
@@ -153,7 +155,7 @@ class CompositionOverlayPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final targetCenter = Offset(size.width / 2, size.height / 2 + 50);
-    _drawPersonFigure(canvas, targetCenter, 100.0, targetPaint);
+    _drawSkeleton(canvas, targetCenter, 100.0, targetPaint, detectedPose);
 
     // 3. Draw moving user skeleton matching coordinates
     final userPaint = Paint()
@@ -165,10 +167,64 @@ class CompositionOverlayPainter extends CustomPainter {
     // Map posX slider to viewport coordinates
     double xOffset = (posX - 50.0) * (size.width / 150.0);
     final userCenter = Offset(size.width / 2 + xOffset, size.height / 2 + 50);
-    _drawPersonFigure(canvas, userCenter, scale, userPaint);
+    _drawSkeleton(canvas, userCenter, scale, userPaint, detectedPose);
   }
 
-  void _drawPersonFigure(Canvas canvas, Offset bottomCenter, double figureScale, Paint paint) {
+  void _drawSkeleton(Canvas canvas, Offset bottomCenter, double figureScale, Paint paint, String pose) {
+    if (pose.toLowerCase() == 'sitting') {
+      _drawSittingFigure(canvas, bottomCenter, figureScale, paint);
+    } else {
+      _drawStandingFigure(canvas, bottomCenter, figureScale, paint);
+    }
+  }
+
+  void _drawSittingFigure(Canvas canvas, Offset bottomCenter, double figureScale, Paint paint) {
+    double scaleFactor = figureScale / 100.0;
+    double figureHeight = 110.0 * scaleFactor; // sitting is shorter
+
+    final headCenter = Offset(bottomCenter.dx, bottomCenter.dy - figureHeight + (15 * scaleFactor));
+    final neck = Offset(bottomCenter.dx, bottomCenter.dy - figureHeight + (35 * scaleFactor));
+    final spine = Offset(bottomCenter.dx, bottomCenter.dy - (40 * scaleFactor));
+    
+    // Shoulders
+    final leftShoulder = Offset(bottomCenter.dx - (35 * scaleFactor), neck.dy + (10 * scaleFactor));
+    final rightShoulder = Offset(bottomCenter.dx + (35 * scaleFactor), neck.dy + (10 * scaleFactor));
+    
+    // Hips
+    final leftHip = Offset(bottomCenter.dx - (20 * scaleFactor), spine.dy);
+    final rightHip = Offset(bottomCenter.dx + (20 * scaleFactor), spine.dy);
+
+    // Draw head
+    canvas.drawCircle(headCenter, 18 * scaleFactor, paint);
+    // Draw torso
+    canvas.drawLine(neck, spine, paint);
+    canvas.drawLine(leftShoulder, rightShoulder, paint);
+    canvas.drawLine(leftHip, rightHip, paint);
+
+    // Arms resting on knees
+    final leftElbow = Offset(leftShoulder.dx - (10 * scaleFactor), spine.dy);
+    final leftHand = Offset(leftHip.dx - (40 * scaleFactor), bottomCenter.dy - (20 * scaleFactor));
+    canvas.drawLine(leftShoulder, leftElbow, paint);
+    canvas.drawLine(leftElbow, leftHand, paint);
+
+    final rightElbow = Offset(rightShoulder.dx + (10 * scaleFactor), spine.dy);
+    final rightHand = Offset(rightHip.dx + (40 * scaleFactor), bottomCenter.dy - (20 * scaleFactor));
+    canvas.drawLine(rightShoulder, rightElbow, paint);
+    canvas.drawLine(rightElbow, rightHand, paint);
+
+    // Sitting Legs (bent forward)
+    final leftKnee = Offset(leftHip.dx - (40 * scaleFactor), bottomCenter.dy - (20 * scaleFactor));
+    final leftFoot = Offset(leftKnee.dx, bottomCenter.dy);
+    canvas.drawLine(leftHip, leftKnee, paint);
+    canvas.drawLine(leftKnee, leftFoot, paint);
+
+    final rightKnee = Offset(rightHip.dx + (40 * scaleFactor), bottomCenter.dy - (20 * scaleFactor));
+    final rightFoot = Offset(rightKnee.dx, bottomCenter.dy);
+    canvas.drawLine(rightHip, rightKnee, paint);
+    canvas.drawLine(rightKnee, rightFoot, paint);
+  }
+
+  void _drawStandingFigure(Canvas canvas, Offset bottomCenter, double figureScale, Paint paint) {
     // scale defaults around 100
     double scaleFactor = figureScale / 100.0;
     double figureHeight = 160.0 * scaleFactor;
@@ -215,6 +271,7 @@ class CompositionOverlayPainter extends CustomPainter {
         oldDelegate.posX != posX ||
         oldDelegate.scale != scale ||
         oldDelegate.isAligned != isAligned ||
-        oldDelegate.activeState != activeState;
+        oldDelegate.activeState != activeState ||
+        oldDelegate.detectedPose != detectedPose;
   }
 }
