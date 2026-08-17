@@ -96,7 +96,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
               // Image Container
               Expanded(
                 child: MotionSystem.elasticBounce(
-                  onTap: _isAnalyzing ? null : () => _pickImage(),
+                  onTap: () { if (!_isAnalyzing) _pickImage(); },
                   scaleDown: 0.95,
                   child: Container(
                     decoration: BoxDecoration(

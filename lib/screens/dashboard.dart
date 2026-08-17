@@ -744,14 +744,6 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _bannerController.dispose();
-    _bannerPulseController.dispose();
-    super.dispose();
-  }
 }
 
 // ─── Reusable Pressable Card ──────────────────────────────────────────────────

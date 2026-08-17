@@ -30,7 +30,7 @@ class RecreationCardScreen extends StatelessWidget {
         title: Text(
           'RESHOT COMPLETE',
           style: GoogleFonts.boogaloo(
-            color: CyberTheme.neonOrange,
+            color: CyberTheme.sunOrange,
             letterSpacing: 1.5,
           ),
         ),
@@ -148,7 +148,7 @@ class RecreationCardScreen extends StatelessWidget {
                                   Text(
                                     '#ReShotTheWorld',
                                     style: GoogleFonts.nunito(
-                                      color: CyberTheme.neonOrange,
+                                      color: CyberTheme.sunOrange,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                     ),

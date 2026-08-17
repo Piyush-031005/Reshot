@@ -258,7 +258,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
           originalImagePath: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=800&fit=crop', // Hardcoded reference for MVP
           capturedImagePath: _capturedFile!.path,
           matchScore: _displayScore,
-          locationName: widget.targetGem.name,
+          locationName: widget.location.name,
         ),
       ),
     );
