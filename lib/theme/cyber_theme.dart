@@ -4,16 +4,16 @@ import 'package:google_fonts/google_fonts.dart';
 /// ReShot Street Cartoon Pop Theme
 /// Bold, fun, social-media-ready. White cards, chunky borders, offset shadows.
 class CyberTheme {
-  // ─── Core Palette ───────────────────────────────────────────────────────────
-  static const Color cream = Color(0xFFFFF8F0);          // warm off-white bg
-  static const Color cardWhite = Color(0xFFFFFFFF);      // card backgrounds
-  static const Color inkBlack = Color(0xFF1A1A1A);       // text + outlines
-  static const Color outlineBlack = Color(0xFF0D0D0D);   // thick border color
+  // ─── Core Palette (Editorial Brutalism) ───────────────────────────────────────────────────────────
+  static const Color cream = Color(0xFFF4F0EA);          // newspaper off-white bg
+  static const Color cardWhite = Color(0xFFFAFAFA);      // card backgrounds
+  static const Color inkBlack = Color(0xFF111111);       // text + outlines
+  static const Color outlineBlack = Color(0xFF111111);   // thick border color
 
-  static const Color limeGreen = Color(0xFFB8FF00);      // electric lime (primary)
-  static const Color hotPink = Color(0xFFFF3E6C);        // hot coral pink (secondary)
-  static const Color electricBlue = Color(0xFF00BFFF);   // electric sky blue (accent)
-  static const Color sunOrange = Color(0xFFFF7A2F);      // vivid orange (highlight)
+  static const Color limeGreen = Color(0xFFE2D016);      // Brand Gap Yellow (repurposed lime)
+  static const Color hotPink = Color(0xFFD63220);        // Graphic Design Bible Red (repurposed pink)
+  static const Color electricBlue = Color(0xFF0D25B9);   // COLOR Blue (repurposed cyan)
+  static const Color sunOrange = Color(0xFFFF5500);      // vivid orange
   static const Color goldenYellow = Color(0xFFFFD700);   // golden badge yellow
   static const Color mintGreen = Color(0xFF00E5A0);      // mint teal (success)
 
@@ -42,44 +42,47 @@ class CyberTheme {
         error: hotPink,
       ),
       textTheme: TextTheme(
-        // Big cartoon headings — Fredoka One is perfectly playful + bold
-        displayLarge: GoogleFonts.boogaloo(
-          fontSize: 36,
+        // Big editorial headings — Anton
+        displayLarge: GoogleFonts.anton(
+          fontSize: 56,
           color: inkBlack,
-          letterSpacing: 0.5,
+          letterSpacing: 1,
         ),
-        displayMedium: GoogleFonts.boogaloo(
-          fontSize: 28,
+        displayMedium: GoogleFonts.anton(
+          fontSize: 42,
           color: inkBlack,
+          letterSpacing: 1,
         ),
-        titleLarge: GoogleFonts.boogaloo(
+        titleLarge: GoogleFonts.oswald(
+          fontSize: 26,
+          color: inkBlack,
+          fontWeight: FontWeight.w700,
+        ),
+        titleMedium: GoogleFonts.oswald(
           fontSize: 20,
           color: inkBlack,
-        ),
-        titleMedium: GoogleFonts.boogaloo(
-          fontSize: 16,
-          color: inkBlack,
-        ),
-        // Body — Nunito: friendly, rounded, great readability
-        bodyLarge: GoogleFonts.nunito(
           fontWeight: FontWeight.w600,
+        ),
+        // Body — Inter: clean, editorial
+        bodyLarge: GoogleFonts.inter(
+          fontWeight: FontWeight.w700,
           fontSize: 16,
           color: inkBlack,
         ),
-        bodyMedium: GoogleFonts.nunito(
+        bodyMedium: GoogleFonts.inter(
           fontWeight: FontWeight.w500,
           fontSize: 14,
-          color: const Color(0xFF555555),
+          color: const Color(0xFF333333),
         ),
-        bodySmall: GoogleFonts.nunito(
+        bodySmall: GoogleFonts.inter(
           fontWeight: FontWeight.w400,
           fontSize: 12,
-          color: const Color(0xFF888888),
+          color: const Color(0xFF555555),
         ),
-        // Labels — slightly bolder Nunito
-        labelLarge: GoogleFonts.nunito(
-          fontWeight: FontWeight.w800,
-          fontSize: 14,
+        // Labels — Caveat (Shooting Star vibe)
+        labelLarge: GoogleFonts.caveat(
+          fontWeight: FontWeight.w700,
+          fontSize: 24,
           color: inkBlack,
         ),
       ),
@@ -88,17 +91,17 @@ class CyberTheme {
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Color(0xFF1A1A1A)),
-        titleTextStyle: GoogleFonts.boogaloo(
-          fontSize: 22,
+        titleTextStyle: GoogleFonts.anton(
+          fontSize: 28,
           color: inkBlack,
-          letterSpacing: 1,
+          letterSpacing: 2,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: limeGreen,
           foregroundColor: inkBlack,
-          textStyle: GoogleFonts.boogaloo(fontSize: 16, letterSpacing: 1),
+          textStyle: GoogleFonts.oswald(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: const BorderSide(color: outlineBlack, width: 3),
@@ -122,12 +125,12 @@ class CyberTheme {
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: limeGreen, width: 3),
         ),
-        hintStyle: GoogleFonts.nunito(color: const Color(0xFFAAAAAA), fontWeight: FontWeight.w500),
+        hintStyle: GoogleFonts.inter(color: const Color(0xFFAAAAAA), fontWeight: FontWeight.w500),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: cardWhite,
         selectedColor: limeGreen,
-        labelStyle: GoogleFonts.nunito(fontWeight: FontWeight.w700, fontSize: 12),
+        labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: outlineBlack, width: 2),
@@ -242,7 +245,7 @@ class CyberTheme {
     return ElevatedButton.styleFrom(
       backgroundColor: bg,
       foregroundColor: fg,
-      textStyle: GoogleFonts.boogaloo(fontSize: 18, letterSpacing: 1),
+      textStyle: GoogleFonts.oswald(fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: 1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: const BorderSide(color: outlineBlack, width: 4),

@@ -8,24 +8,29 @@ import 'package:google_fonts/google_fonts.dart';
 /// comic typography, bold shadows, and glitch accents.
 class ReShotDesignSystem {
   
-  // ─── Core Identity (The DNA) ──────────────────────────────────────────
+  // ─── Core Identity (Editorial Brutalism) ─────────────────────────
   
   // Global Structural Colors
-  static const Color creamBg = Color(0xFFFFF8F0);
-  static const Color darkBg = Color(0xFF0D0F12);
-  static const Color inkBlack = Color(0xFF121212);
-  static const Color cardWhite = Color(0xFFF8F5F2); // Off-white for stickers/cards
-  static const Color darkSurface = Color(0xFF15181F); // tactical HUD background Neons
+  static const Color creamBg = Color(0xFFF4F0EA); // Newspaper off-white
+  static const Color darkBg = Color(0xFF0F0F0F);
+  static const Color inkBlack = Color(0xFF111111);
+  static const Color cardWhite = Color(0xFFFAFAFA); 
+  static const Color darkSurface = Color(0xFF1A1A1A); 
   
-  // Brand Neons
-  static const Color neonLime = Color(0xFFB8FF00);
-  static const Color hotPink = Color(0xFFFF3E6C);
-  static const Color cyberCyan = Color(0xFF00E5FF);
-  static const Color sunOrange = Color(0xFFFF7A2F);
+  // Editorial Accent Colors (From Inspiration)
+  static const Color editorialRed = Color(0xFFD63220); // The Graphic Design Bible Red
+  static const Color editorialBlue = Color(0xFF0D25B9); // The COLOR blue
+  static const Color editorialYellow = Color(0xFFE2D016); // Brand Gap Yellow
+  
+  // Legacy mappings for backward compatibility
+  static const Color neonLime = editorialYellow;
+  static const Color hotPink = editorialRed;
+  static const Color cyberCyan = editorialBlue;
+  static const Color sunOrange = Color(0xFFFF5500);
 
   // Brutalist Borders & Shadows
-  static const double borderWidth = 4.0;
-  static const Offset shadowOffset = Offset(8, 8);
+  static const double borderWidth = 3.0;
+  static const Offset shadowOffset = Offset(6, 6);
   
   static Border get brutalistBorder => Border.all(color: inkBlack, width: borderWidth);
   
@@ -34,34 +39,34 @@ class ReShotDesignSystem {
   ];
 
   static List<BoxShadow> get brutalistShadowPink => [
-    const BoxShadow(color: hotPink, offset: shadowOffset, blurRadius: 0),
+    const BoxShadow(color: editorialRed, offset: shadowOffset, blurRadius: 0),
   ];
 
   static List<BoxShadow> get brutalistShadowCyan => [
-    const BoxShadow(color: cyberCyan, offset: shadowOffset, blurRadius: 0),
+    const BoxShadow(color: editorialBlue, offset: shadowOffset, blurRadius: 0),
   ];
 
   // ─── Typography System ────────────────────────────────────────────────
   
   static TextTheme get textTheme {
     return TextTheme(
-      // Display: Boogaloo (Comic/Graffiti vibe)
-      displayLarge: GoogleFonts.boogaloo(fontSize: 48, color: inkBlack, height: 1.1),
-      displayMedium: GoogleFonts.boogaloo(fontSize: 36, color: inkBlack, height: 1.1),
-      displaySmall: GoogleFonts.boogaloo(fontSize: 28, color: inkBlack, height: 1.1),
+      // Display: Anton (Massive, condensed, brutalist)
+      displayLarge: GoogleFonts.anton(fontSize: 56, color: inkBlack, height: 1.0, letterSpacing: 1),
+      displayMedium: GoogleFonts.anton(fontSize: 42, color: inkBlack, height: 1.0, letterSpacing: 1),
+      displaySmall: GoogleFonts.anton(fontSize: 32, color: inkBlack, height: 1.1, letterSpacing: 0.5),
       
-      // Titles: Boogaloo or Bungee
-      titleLarge: GoogleFonts.boogaloo(fontSize: 24, color: inkBlack, letterSpacing: 0.5),
-      titleMedium: GoogleFonts.boogaloo(fontSize: 20, color: inkBlack, letterSpacing: 0.5),
-      titleSmall: GoogleFonts.boogaloo(fontSize: 16, color: inkBlack, letterSpacing: 0.5),
+      // Titles: Oswald (Structured, editorial)
+      titleLarge: GoogleFonts.oswald(fontSize: 26, color: inkBlack, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+      titleMedium: GoogleFonts.oswald(fontSize: 20, color: inkBlack, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+      titleSmall: GoogleFonts.oswald(fontSize: 16, color: inkBlack, fontWeight: FontWeight.w600, letterSpacing: 0.5),
       
-      // Body: Nunito (Friendly, readable, geometric)
-      bodyLarge: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w800, color: inkBlack),
-      bodyMedium: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF333333)),
-      bodySmall: GoogleFonts.nunito(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF666666)),
+      // Body: Inter (Clean, readable, Swiss design style)
+      bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: inkBlack),
+      bodyMedium: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xFF333333)),
+      bodySmall: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: const Color(0xFF555555)),
       
-      // Labels: Techy/Mono feel for data (Press Start 2P or bold Nunito)
-      labelLarge: GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1),
+      // Labels: Caveat (Shooting Star vibe, handwritten accent)
+      labelLarge: GoogleFonts.caveat(fontSize: 24, fontWeight: FontWeight.w700, color: inkBlack),
     );
   }
 
