@@ -110,6 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       if (mounted) {
         setState(() {
           _currentPosition = position;
+          _applyFilters();
         });
       }
     });
@@ -144,6 +145,16 @@ class _DashboardScreenState extends State<DashboardScreen>
             _selectedFilters.every((tag) => gem.tags.contains(tag));
         return matchesQuery && matchesTags;
       }).toList();
+
+      if (_currentPosition != null) {
+        _filteredGems.sort((a, b) {
+          final distA = Geolocator.distanceBetween(
+              _currentPosition!.latitude, _currentPosition!.longitude, a.latitude, a.longitude);
+          final distB = Geolocator.distanceBetween(
+              _currentPosition!.latitude, _currentPosition!.longitude, b.latitude, b.longitude);
+          return distA.compareTo(distB);
+        });
+      }
     });
   }
 
@@ -328,18 +339,33 @@ class _DashboardScreenState extends State<DashboardScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '📸 RECREATE ANY PHOTO',
+                  '📸 AI RECREATION',
                   style: ReShotDesignSystem.textTheme.displaySmall!.copyWith(
                     color: ReShotDesignSystem.cardWhite,
                     letterSpacing: 1,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: ReShotDesignSystem.inkBlack,
+                    borderRadius: BorderRadius.circular(8),
+                    border: ReShotDesignSystem.brutalistBorder,
+                  ),
+                  child: Text(
+                    'TAP TO UPLOAD IMAGE',
+                    style: ReShotDesignSystem.textTheme.titleMedium!.copyWith(
+                      color: ReShotDesignSystem.neonLime,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Text(
-                  'FRAME IT. LOCK IT. HAND IT OVER.\nRESHOT AUTO-CAPTURES WHEN ALIGNED!',
-                  style: ReShotDesignSystem.textTheme.bodyLarge!.copyWith(
+                  'Let AI analyze any photo and find the real-world location for you to recreate!',
+                  style: ReShotDesignSystem.textTheme.bodyMedium!.copyWith(
                     color: ReShotDesignSystem.cardWhite,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -353,7 +379,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               borderRadius: BorderRadius.circular(16),
               border: ReShotDesignSystem.brutalistBorder,
             ),
-            child: const Text('🎯', style: TextStyle(fontSize: 32)),
+            child: const Text('✨', style: TextStyle(fontSize: 32)),
           ),
         ],
       ),
