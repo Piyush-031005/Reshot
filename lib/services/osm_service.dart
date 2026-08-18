@@ -18,24 +18,24 @@ class OSMService {
     for (String label in labels) {
       String l = label.toLowerCase();
       if (l.contains('waterfall')) {
-        tagQuery = 'node["waterway"="waterfall"]';
+        tagQuery = 'nwr["waterway"="waterfall"]';
         break;
       } else if (l.contains('mountain') || l.contains('peak')) {
-        tagQuery = 'node["natural"="peak"]';
+        tagQuery = 'nwr["natural"="peak"]';
         break;
       } else if (l.contains('park') || l.contains('nature')) {
-        tagQuery = 'node["leisure"="park"]';
+        tagQuery = 'nwr["leisure"="park"]';
         break;
       } else if (l.contains('temple') || l.contains('shrine')) {
-        tagQuery = 'node["amenity"="place_of_worship"]';
+        tagQuery = 'nwr["amenity"="place_of_worship"]';
         radius = 20000;
         break;
       } else if (l.contains('cafe') || l.contains('coffee') || l.contains('restaurant')) {
-        tagQuery = 'node["amenity"~"cafe|restaurant"]';
+        tagQuery = 'nwr["amenity"~"cafe|restaurant"]';
         radius = 10000;
         break;
       } else if (l.contains('building') || l.contains('skyscraper') || l.contains('skyline') || l.contains('university')) {
-        tagQuery = 'node["amenity"="university"]'; // specifically looking for university/college nearby if building is detected
+        tagQuery = 'nwr["amenity"="university"]'; // specifically looking for university/college nearby if building is detected
         radius = 10000; // 10km radius
         break;
       }
@@ -43,19 +43,17 @@ class OSMService {
 
     if (tagQuery.isEmpty) {
       // Default to finding a general attraction
-      tagQuery = 'node["tourism"="attraction"]';
+      tagQuery = 'nwr["tourism"="attraction"]';
       radius = 20000;
     }
     
-    // Overpass QL query
+    // Overpass QL query - use 'out center' so ways and relations return a lat/lon center point
     final query = '''
       [out:json][timeout:25];
       (
         $tagQuery(around:$radius,$lat,$lon);
       );
-      out body;
-      >;
-      out skel qt;
+      out center;
     ''';
 
     try {
@@ -71,11 +69,16 @@ class OSMService {
           final firstMatch = data['elements'][0];
           String name = firstMatch['tags']?['name'] ?? 'Similar Location found via OpenStreetMap';
           
-          return {
-            'name': name,
-            'lat': firstMatch['lat'],
-            'lon': firstMatch['lon'],
-          };
+          double? elementLat = firstMatch['lat'] ?? firstMatch['center']?['lat'];
+          double? elementLon = firstMatch['lon'] ?? firstMatch['center']?['lon'];
+          
+          if (elementLat != null && elementLon != null) {
+            return {
+              'name': name,
+              'lat': elementLat,
+              'lon': elementLon,
+            };
+          }
         }
       } else {
         debugPrint('OSM Overpass API error: $response.statusCode');
