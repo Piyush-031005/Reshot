@@ -260,12 +260,12 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                           const SizedBox(height: 20),
 
-                          // ReSHOT wordmark
+                          // FINDRA wordmark
                           RichText(
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: 'Re',
+                                  text: 'FIND',
                                   style: GoogleFonts.boogaloo(
                                     fontSize: 54,
                                     color: CyberTheme.inkBlack,
@@ -273,7 +273,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   ),
                                 ),
                                 TextSpan(
-                                  text: 'SHOT',
+                                  text: 'RA',
                                   style: GoogleFonts.boogaloo(
                                     fontSize: 54,
                                     color: CyberTheme.hotPink,
@@ -294,7 +294,7 @@ class _SplashScreenState extends State<SplashScreen>
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              'EXPLORER EDITION',
+                              'AI EDITION',
                               style: GoogleFonts.nunito(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
@@ -316,7 +316,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: FadeTransition(
                       opacity: _taglineFade,
                       child: Text(
-                        'Frame the background. Hand it to a stranger.\nReShot auto-captures when perfectly aligned.',
+                        'Upload a photo. Find the exact vibe.\nFindra AI discovers similar places nearby.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.nunito(
                           fontSize: 15,
