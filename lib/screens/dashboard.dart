@@ -246,7 +246,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           const SizedBox(width: 12),
           Text(
-            'ReSHOT',
+            'FINDRA',
             style: ReShotDesignSystem.textTheme.displayMedium!.copyWith(
               color: ReShotDesignSystem.inkBlack,
               letterSpacing: 2,

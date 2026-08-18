@@ -13,6 +13,8 @@ class OSMService {
 
     // Map general labels to OSM tags
     String tagQuery = '';
+    int radius = 50000;
+    
     for (String label in labels) {
       String l = label.toLowerCase();
       if (l.contains('waterfall')) {
@@ -24,16 +26,26 @@ class OSMService {
       } else if (l.contains('park') || l.contains('nature')) {
         tagQuery = 'node["leisure"="park"]';
         break;
+      } else if (l.contains('temple') || l.contains('shrine')) {
+        tagQuery = 'node["amenity"="place_of_worship"]';
+        radius = 20000;
+        break;
+      } else if (l.contains('cafe') || l.contains('coffee') || l.contains('restaurant')) {
+        tagQuery = 'node["amenity"~"cafe|restaurant"]';
+        radius = 10000;
+        break;
+      } else if (l.contains('building') || l.contains('skyscraper') || l.contains('skyline') || l.contains('university')) {
+        tagQuery = 'node["amenity"="university"]'; // specifically looking for university/college nearby if building is detected
+        radius = 10000; // 10km radius
+        break;
       }
     }
 
     if (tagQuery.isEmpty) {
-      // Default to finding a viewpoint or tourism spot if we don't have a specific tag mapping
-      tagQuery = 'node["tourism"="viewpoint"]';
+      // Default to finding a general attraction
+      tagQuery = 'node["tourism"="attraction"]';
+      radius = 20000;
     }
-
-    // Search within 50km radius
-    final radius = 50000;
     
     // Overpass QL query
     final query = '''
@@ -66,7 +78,7 @@ class OSMService {
           };
         }
       } else {
-        debugPrint('OSM Overpass API error: ${response.statusCode}');
+        debugPrint('OSM Overpass API error: $response.statusCode');
       }
     } catch (e) {
       debugPrint('OSMService error: $e');
