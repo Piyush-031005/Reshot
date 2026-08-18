@@ -3,15 +3,11 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 
 class OSMService {
-  // Free Overpass API endpoint
   static const String _overpassUrl = 'https://overpass-api.de/api/interpreter';
 
-  /// Searches OpenStreetMap for nearby features based on ML Kit labels.
-  /// Example label: 'waterfall', 'mountain', 'park'.
   Future<Map<String, dynamic>?> findSimilarNearby(List<String> labels, double lat, double lon) async {
     if (labels.isEmpty) return null;
 
-    // Map general labels to OSM tags
     String tagQuery = '';
     int radius = 50000;
     
@@ -35,8 +31,8 @@ class OSMService {
         radius = 10000;
         break;
       } else if (l.contains('building') || l.contains('skyscraper') || l.contains('skyline') || l.contains('university') || l.contains('office')) {
-        tagQuery = 'nwr["amenity"="university"]'; // specifically looking for university/college nearby if building is detected
-        radius = 10000; // 10km radius
+        tagQuery = 'nwr["amenity"="university"]'; 
+        radius = 10000;
         break;
       } else if (l.contains('water') || l.contains('river') || l.contains('lake')) {
         tagQuery = 'nwr["water"]';
@@ -50,18 +46,16 @@ class OSMService {
     }
 
     if (tagQuery.isEmpty) {
-      // Ultimate fallback: Just find ANY named feature (amenity, building, or place) within 2km
       tagQuery = 'nwr["name"]';
       radius = 2000;
     }
     
-    // Overpass QL query
     final query = '''
       [out:json][timeout:25];
       (
         $tagQuery(around:$radius,$lat,$lon);
       );
-      out center 1; // Limit to 1 result for speed and safety
+      out center 1;
     ''';
 
     try {
@@ -77,7 +71,6 @@ class OSMService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['elements'] != null && data['elements'].isNotEmpty) {
-          // Return the first match
           final firstMatch = data['elements'][0];
           String name = firstMatch['tags']?['name'] ?? 'Similar Location found via OpenStreetMap';
           
@@ -91,14 +84,48 @@ class OSMService {
               'lon': elementLon,
             };
           }
+        } else {
+           return await _reverseGeocodeFallback(lat, lon);
         }
       } else {
-        debugPrint('OSM Overpass API error: $response.statusCode');
+        debugPrint('OSM Overpass API error: $');
+        return await _reverseGeocodeFallback(lat, lon);
       }
     } catch (e) {
       debugPrint('OSMService error: $e');
+      return await _reverseGeocodeFallback(lat, lon);
     }
     
+    return null;
+  }
+
+  // Backup system: Uses Nominatim Reverse Geocoding if Overpass fails or is too slow
+  Future<Map<String, dynamic>?> _reverseGeocodeFallback(double lat, double lon) async {
+    final url = 'https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'User-Agent': 'FindraApp/1.0 (piyush@example.com)'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        String? finalName = data['name'];
+        if (finalName == null || finalName.isEmpty) {
+          if (data['display_name'] != null) {
+            finalName = data['display_name'].split(',')[0];
+          }
+        }
+        if (finalName != null && finalName.isNotEmpty) {
+          return {
+            'name': finalName,
+            'lat': lat,
+            'lon': lon,
+          };
+        }
+      }
+    } catch (e) {
+      debugPrint('Nominatim fallback error: $e');
+    }
     return null;
   }
 }
