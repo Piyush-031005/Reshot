@@ -88,7 +88,7 @@ class OSMService {
            return await _reverseGeocodeFallback(lat, lon);
         }
       } else {
-        debugPrint('OSM Overpass API error: $');
+        debugPrint('OSM Overpass API error: ${response.statusCode}');
         return await _reverseGeocodeFallback(lat, lon);
       }
     } catch (e) {
@@ -129,4 +129,5 @@ class OSMService {
     return null;
   }
 }
+
 
