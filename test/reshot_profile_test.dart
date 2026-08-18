@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reshot/models/profile_model.dart';
-import 'package:reshot/models/reshot_capture_model.dart';
-import 'package:reshot/models/hidden_gem_model.dart';
-import 'package:reshot/repositories/gallery_repository.dart';
-import 'package:reshot/repositories/hidden_gem_repository.dart';
-import 'package:reshot/repositories/profile_repository.dart';
-import 'package:reshot/providers/repository_provider.dart';
+import 'package:findra/models/profile_model.dart';
+import 'package:findra/models/reshot_capture_model.dart';
+import 'package:findra/models/hidden_gem_model.dart';
+import 'package:findra/repositories/gallery_repository.dart';
+import 'package:findra/repositories/hidden_gem_repository.dart';
+import 'package:findra/repositories/profile_repository.dart';
+import 'package:findra/providers/repository_provider.dart';
 
 // In-memory repositories for testing
 class MockGalleryRepository implements GalleryRepository {

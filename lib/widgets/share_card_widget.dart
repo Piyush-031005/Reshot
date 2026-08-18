@@ -185,8 +185,8 @@ class ShareCardWidget extends StatelessWidget {
       final file = await File('${tempDir.path}/share_${capture.id}.png').create();
       await file.writeAsBytes(bytes);
 
-      await Share.shareXFiles(
-        [XFile(file.path)],
+      await SharePlus.instance.share(
+        xFiles: [XFile(file.path)],
         text: 'Check out my ${capture.score.round()}% match on ReSHOT! 📸',
       );
     } catch (e) {

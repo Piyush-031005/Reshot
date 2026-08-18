@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reshot/models/reshot_capture_model.dart';
-import 'package:reshot/models/hidden_gem_model.dart';
+import 'package:findra/models/reshot_capture_model.dart';
+import 'package:findra/models/hidden_gem_model.dart';
 
 void main() {
   // ─────────────────────────────────────────────────
