@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -224,12 +224,15 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                                 final gem = HiddenGemModel(
                                   id: 'osm-temp',
                                   name: engine.resultName!,
+                                  description: 'Discovered via Findra AI',
                                   latitude: engine.resultLat!,
                                   longitude: engine.resultLon!,
+                                  altitude: 'Unknown',
                                   tags: engine.detectedLabels,
-                                  discovererId: 'findra-ai',
-                                  imagePath: '',
-                                  timestamp: DateTime.now(),
+                                  photoPath: '',
+                                  createdAt: DateTime.now(),
+                                  updatedAt: DateTime.now(),
+                                  ownerId: 'findra-ai',
                                 );
                                 Navigator.push(
                                   context,
