@@ -90,18 +90,18 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: const ReShotApp(),
+      child: const FindraApp(),
     ),
   );
 }
 
-class ReShotApp extends StatelessWidget {
-  const ReShotApp({super.key});
+class FindraApp extends StatelessWidget {
+  const FindraApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ReShot',
+      title: 'Findra',
       debugShowCheckedModeBanner: false,
       theme: CyberTheme.themeData,
       // Splash is the entry point — transitions to HomeShell (bottom nav) after animations
