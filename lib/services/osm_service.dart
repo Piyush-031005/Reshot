@@ -59,6 +59,10 @@ class OSMService {
     try {
       final response = await http.post(
         Uri.parse(_overpassUrl),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'FindraApp/1.0 (piyush@example.com)'
+        },
         body: {'data': query},
       );
 

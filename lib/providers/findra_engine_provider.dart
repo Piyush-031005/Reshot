@@ -46,6 +46,7 @@ class FindraEngineProvider extends ChangeNotifier {
       // 2. Get Current Location (Defaulting to Pithoragarh for testing if permission fails)
       double lat = 29.5829;
       double lon = 80.2182;
+      bool usingRealLocation = false;
       
       try {
         LocationPermission permission = await Geolocator.checkPermission();
@@ -53,9 +54,14 @@ class FindraEngineProvider extends ChangeNotifier {
           permission = await Geolocator.requestPermission();
         }
         if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
-          Position position = await Geolocator.getCurrentPosition();
+          // Use getLastKnownPosition first for speed, then getCurrentPosition with timeout
+          Position? position = await Geolocator.getLastKnownPosition();
+          position ??= await Geolocator.getCurrentPosition(
+            timeLimit: const Duration(seconds: 5),
+          );
           lat = position.latitude;
           lon = position.longitude;
+          usingRealLocation = true;
         }
       } catch (e) {
         debugPrint('Geolocator error, using default location: $e');
@@ -71,7 +77,8 @@ class FindraEngineProvider extends ChangeNotifier {
         _state = EngineState.success;
       } else {
         _state = EngineState.error;
-        _errorMessage = "Detected ${_detectedLabels.join(', ')} but couldn't find a similar spot nearby.";
+        String locMsg = usingRealLocation ? "near you" : "near default location (Pithoragarh)";
+        _errorMessage = "Detected ${_detectedLabels.join(', ')} but couldn't find a similar spot $locMsg.";
       }
     } catch (e) {
       _state = EngineState.error;
