@@ -1,13 +1,12 @@
-import 'dart:io';
-import 'dart:math';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import '../theme/cyber_theme.dart';
 import '../theme/design_system.dart';
 import '../theme/motion_system.dart';
-import 'package:provider/provider.dart';
 import '../models/hidden_gem_model.dart';
-import '../providers/repository_provider.dart';
+import '../providers/findra_engine_provider.dart';
 import 'navigation_standby_screen.dart';
 
 class ImageUploadScreen extends StatefulWidget {
@@ -19,14 +18,6 @@ class ImageUploadScreen extends StatefulWidget {
 
 class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProviderStateMixin {
   File? _selectedImage;
-  bool _isAnalyzing = false;
-  bool _showResult = false;
-  
-  // AI Mock Data
-  HiddenGemModel? _matchedGem;
-  bool _isExactMatch = false;
-  String _detectedPose = "Standing";
-  
   late AnimationController _pulseController;
 
   @override
@@ -51,40 +42,17 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
-        _showResult = false;
       });
+      if (mounted) {
+        context.read<FindraEngineProvider>().reset();
+      }
     }
-  }
-
-  Future<void> _analyzeImage() async {
-    setState(() => _isAnalyzing = true);
-    
-    // ─── AI Mock Logic (Vibe & Pose Detection) ───
-    final allGems = await context.read<AppRepositoryProvider>().hiddenGemRepository.getHiddenGems();
-    if (allGems.isEmpty) return; // Should not happen, but safeguard
-    
-    final random = Random();
-    
-    // Randomly pick a gem to "match"
-    _matchedGem = allGems[random.nextInt(allGems.length)];
-    // Randomly decide if it's an exact match or similar vibe (mostly similar)
-    _isExactMatch = random.nextDouble() > 0.7; 
-    // Randomly detect a pose
-    _detectedPose = random.nextBool() ? "Standing" : "Sitting";
-    
-    // Mock AI Analysis Delay
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      setState(() {
-        _isAnalyzing = false;
-        _showResult = true;
-      });
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final engine = context.watch<FindraEngineProvider>();
 
     return Scaffold(
       backgroundColor: CyberTheme.cream,
@@ -92,7 +60,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
         backgroundColor: CyberTheme.inkBlack,
         iconTheme: const IconThemeData(color: CyberTheme.cardWhite),
         title: Text(
-          'AI PLACE FINDER',
+          'FINDRA AI',
           style: textTheme.titleLarge!.copyWith(
             color: CyberTheme.limeGreen,
             letterSpacing: 1.5,
@@ -106,7 +74,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Upload a photo you want to recreate.',
+                'Upload a photo to find a similar vibe nearby.',
                 style: textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -115,7 +83,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
               // Image Container
               Expanded(
                 child: MotionSystem.elasticBounce(
-                  onTap: () { if (!_isAnalyzing) _pickImage(); },
+                  onTap: () { if (engine.state != EngineState.analyzing) _pickImage(); },
                   scaleDown: 0.95,
                   child: Container(
                     decoration: BoxDecoration(
@@ -130,7 +98,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                             fit: StackFit.expand,
                             children: [
                               Image.file(_selectedImage!, fit: BoxFit.cover),
-                              if (_isAnalyzing)
+                              if (engine.state == EngineState.analyzing)
                                 Container(
                                   color: Colors.black87,
                                   child: Center(
@@ -148,7 +116,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          'Extracting subject pose & background vibe',
+                                          'Extracting labels & searching maps',
                                           style: textTheme.bodySmall!.copyWith(color: Colors.white70),
                                         ),
                                       ],
@@ -175,7 +143,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
               const SizedBox(height: 24),
               
               // Result Card
-              if (_showResult && _matchedGem != null) ...[
+              if (engine.state == EngineState.success && engine.resultName != null) ...[
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: ReShotDesignSystem.streetPopColoredCard(CyberTheme.limeGreen),
@@ -183,20 +151,18 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                     children: [
                       Row(
                         children: [
-                          Text(_isExactMatch ? '📍' : '✨', style: const TextStyle(fontSize: 24)),
+                          Text('✨', style: const TextStyle(fontSize: 24)),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  _isExactMatch ? 'Exact Match Found!' : 'Similar Vibe Found!',
+                                  'Similar Vibe Found!',
                                   style: textTheme.titleLarge,
                                 ),
                                 Text(
-                                  _isExactMatch 
-                                    ? 'We found the exact location from the photo.'
-                                    : 'No exact match. Found a similar ${_matchedGem!.tags.first.toLowerCase()} nearby.',
+                                  'Found a similar spot nearby based on labels.',
                                   style: textTheme.bodyMedium,
                                 ),
                               ],
@@ -205,7 +171,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                         ],
                       ),
                       const SizedBox(height: 16),
-                      // AI Inference Details (Confidence/Pose)
+                      // AI Inference Details
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
@@ -215,13 +181,12 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Pose: $_detectedPose',
-                              style: textTheme.bodySmall!.copyWith(color: CyberTheme.cardWhite),
-                            ),
-                            Text(
-                              'Match: ${_isExactMatch ? '99%' : '${80 + Random().nextInt(15)}%'}',
-                              style: textTheme.bodySmall!.copyWith(color: CyberTheme.limeGreen),
+                            Expanded(
+                              child: Text(
+                                'Detected: ${engine.detectedLabels.take(3).join(", ")}',
+                                style: textTheme.bodySmall!.copyWith(color: CyberTheme.cardWhite),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
@@ -241,8 +206,8 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(_matchedGem!.name, style: textTheme.titleMedium, overflow: TextOverflow.ellipsis),
-                                  Text('${_matchedGem!.latitude.toStringAsFixed(4)}, ${_matchedGem!.longitude.toStringAsFixed(4)}', style: textTheme.bodySmall),
+                                  Text(engine.resultName!, style: textTheme.titleMedium, overflow: TextOverflow.ellipsis),
+                                  Text('${engine.resultLat!.toStringAsFixed(4)}, ${engine.resultLon!.toStringAsFixed(4)}', style: textTheme.bodySmall),
                                 ],
                               ),
                             ),
@@ -256,12 +221,22 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               ),
                               onPressed: () {
+                                final gem = HiddenGemModel(
+                                  id: 'osm-temp',
+                                  name: engine.resultName!,
+                                  latitude: engine.resultLat!,
+                                  longitude: engine.resultLon!,
+                                  tags: engine.detectedLabels,
+                                  discovererId: 'findra-ai',
+                                  imagePath: '',
+                                  timestamp: DateTime.now(),
+                                );
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (c) => NavigationStandbyScreen(
-                                      targetGem: _matchedGem!,
-                                      detectedPose: _detectedPose,
+                                      targetGem: gem,
+                                      detectedPose: 'Standing', // Defaulting for now
                                     ),
                                   ),
                                 );
@@ -274,9 +249,20 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                     ],
                   ),
                 ),
-              ] else if (_selectedImage != null && !_isAnalyzing) ...[
+              ] else if (engine.state == EngineState.error) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: ReShotDesignSystem.streetPopColoredCard(CyberTheme.hotPink),
+                  child: Text(
+                    engine.errorMessage ?? 'An error occurred.',
+                    style: textTheme.bodyMedium!.copyWith(color: CyberTheme.inkBlack, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ] else if (_selectedImage != null && engine.state == EngineState.idle) ...[
                 MotionSystem.elasticBounce(
-                  onTap: _analyzeImage,
+                  onTap: () {
+                    context.read<FindraEngineProvider>().processPhoto(_selectedImage!.path);
+                  },
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 16),
