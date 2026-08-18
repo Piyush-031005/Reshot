@@ -20,40 +20,48 @@ class OSMService {
       if (l.contains('waterfall')) {
         tagQuery = 'nwr["waterway"="waterfall"]';
         break;
-      } else if (l.contains('mountain') || l.contains('peak')) {
+      } else if (l.contains('mountain') || l.contains('peak') || l.contains('hill')) {
         tagQuery = 'nwr["natural"="peak"]';
         break;
-      } else if (l.contains('park') || l.contains('nature')) {
+      } else if (l.contains('park') || l.contains('nature') || l.contains('tree') || l.contains('plant')) {
         tagQuery = 'nwr["leisure"="park"]';
         break;
-      } else if (l.contains('temple') || l.contains('shrine')) {
+      } else if (l.contains('temple') || l.contains('shrine') || l.contains('church') || l.contains('religion')) {
         tagQuery = 'nwr["amenity"="place_of_worship"]';
         radius = 20000;
         break;
-      } else if (l.contains('cafe') || l.contains('coffee') || l.contains('restaurant')) {
+      } else if (l.contains('cafe') || l.contains('coffee') || l.contains('restaurant') || l.contains('food')) {
         tagQuery = 'nwr["amenity"~"cafe|restaurant"]';
         radius = 10000;
         break;
-      } else if (l.contains('building') || l.contains('skyscraper') || l.contains('skyline') || l.contains('university')) {
+      } else if (l.contains('building') || l.contains('skyscraper') || l.contains('skyline') || l.contains('university') || l.contains('office')) {
         tagQuery = 'nwr["amenity"="university"]'; // specifically looking for university/college nearby if building is detected
         radius = 10000; // 10km radius
+        break;
+      } else if (l.contains('water') || l.contains('river') || l.contains('lake')) {
+        tagQuery = 'nwr["water"]';
+        radius = 15000;
+        break;
+      } else if (l.contains('bridge')) {
+        tagQuery = 'nwr["bridge"="yes"]';
+        radius = 10000;
         break;
       }
     }
 
     if (tagQuery.isEmpty) {
-      // Default to finding a general attraction
-      tagQuery = 'nwr["tourism"="attraction"]';
-      radius = 20000;
+      // Ultimate fallback: Just find ANY named feature (amenity, building, or place) within 2km
+      tagQuery = 'nwr["name"]';
+      radius = 2000;
     }
     
-    // Overpass QL query - use 'out center' so ways and relations return a lat/lon center point
+    // Overpass QL query
     final query = '''
       [out:json][timeout:25];
       (
         $tagQuery(around:$radius,$lat,$lon);
       );
-      out center;
+      out center 1; // Limit to 1 result for speed and safety
     ''';
 
     try {

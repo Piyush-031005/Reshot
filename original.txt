@@ -1,0 +1,96 @@
+# ReShot — Final Product Spec
+
+## One-line definition
+**ReShot turns any photo into a real-world adventure: it finds where a photo was taken (or the closest alternative), then guides you to stand, pose, and shoot the same frame yourself.**
+
+Not a pose-matching app. Not a filter app. It's a **"see it → go recreate it"** app.
+
+---
+
+## Core user flow (the DNA of the app)
+
+```
+Photo from Instagram / Pinterest / Friend / Anywhere
+        ↓
+    Upload to ReShot
+        ↓
+    AI understands the image (subject, scenery type, landmarks)
+        ↓
+📍 Exact Place Found          🌍 No Exact Match → Similar Places Nearby
+        ↓                              ↓
+        └──────────── Take me there ───┘
+                    ↓
+        AI guides me to the exact standing spot
+                    ↓
+        AI guides pose + framing + camera angle live
+                    ↓
+        Optional: AI matches original photo's style/filter
+                    ↓
+            Perfect recreation, shared
+```
+
+---
+
+## v1 — What actually gets BUILT first (do not skip this order)
+
+Only these 3. Nothing else touches code until these work end-to-end on a real device, real location.
+
+### 1. AI Place Finder ⭐ (the heart of the app)
+- User uploads any image
+- Two outcomes only:
+  - **Exact match** → GPS pin, Maps route (this is realistic mainly for known landmarks / geotagged reference datasets)
+  - **No exact match** → show ranked **"Similar Places Nearby"** with a % match score (e.g. Birthi Falls 98%, Chandak Falls 87%)
+- Be honest in the UI about which mode it's in — "Exact Match Found 📍" vs "Similar Vibes Nearby ✨" — so the user never feels the app "got it wrong"
+
+### 2. Similar Location Engine
+- Same engine as above but explicitly framed for the cross-country case: photo is Switzerland, user is in India → show Auli, Munsyari, Ladakh, Tawang as aesthetic alternatives, not "not found"
+- This is what makes the app useful for 99% of uploads (most photos won't have an exact geotag match)
+
+### 3. Recreation Assistant + Smart Camera Coach
+- Once at the location: step-by-step live guidance — "2 steps back," "turn left," "raise phone," "tilt body"
+- Feedback in human language, not percentages: "Head — perfect," "Body — move right," "Camera — lower," "Sun — wait 8 minutes"
+- This is your actual technical differentiator (pose estimation + live camera overlay) — nobody mainstream does this well
+
+**v1 = these three, working, on a real phone, for a real photo. That's the entire first milestone.**
+
+---
+
+## v1.5 — Add only after v1 is proven and demo-able
+- **Style Match** (optional toggle): detect warm/moody/vintage/film tone from reference photo, offer to apply — user can decline and shoot normal
+- **AI Shot Replay**: after clicking, log camera height, distance, phone tilt, sun direction so the shot is repeatable later (this is cheap once Recreation Assistant exists — you're already tracking this data)
+
+---
+
+## Later / v2+ — real ideas, but NOT MVP (park these, don't build)
+These all depend on either a user base you don't have yet, or a data source that doesn't exist yet. Don't let excitement pull these into the build queue early.
+
+- **"What Would This Look Like Here?"** (vibe transfer across geography) — genuinely hard, needs its own model work
+- **Memory Recreation** (old family photos) — hardest technical ask on the whole list, low-res + old-camera geometry, park indefinitely
+- **AI Crowd Predictor** — no real data source exists for this; would be fake heuristics pretending to be intelligence, don't ship dishonestly
+- **Hidden Frame Score / Secret Angles / Live Photo Missions** — chicken-and-egg, needs a critical mass of existing users' shots first
+- **Local Explorer Mode** (hire/follow local guides) — a whole marketplace product on its own, not a feature
+- **ReShot Originals** (community-submitted undiscovered spots) — needs an existing engaged community to seed it
+- **One Tap Travel Plan** (full itinerary generator) — nice but scope-expanding, becomes its own trip-planning product
+
+---
+
+## 7+ new angles worth considering (mix of yours, dost's, and mine — flagged by likely impact)
+
+1. **Confidence-first UI, always** — every result screen should show *why* the AI thinks this, not just a score. Builds trust instead of feeling like a black box guess. (mine)
+2. **Offline-first Recreation Assistant** — once the user is at a remote location (waterfall, mountain — exactly your target use case), there's often no signal. The guidance step must work with a pre-downloaded pack, not live API calls. This could be the difference between the app being usable in the field or not. (mine — this is a real risk in your exact use case, worth prioritizing over most v2 features)
+3. **Single-photo vs multi-angle reference** — let advanced users upload 2-3 reference photos of the same spot (different angles found online) so the Recreation Assistant has more to triangulate from. Cheap add, meaningfully better accuracy. (mine)
+4. **"Best time to go" as a static/manual field first, not AI-predicted** — instead of building fake crowd prediction, let verified local explorers or the original uploader manually tag "best time: early morning" — same value, zero fake-AI risk, and doubles as a seed for the Explorer/Originals feature later. (merged: real version of dost's Crowd Predictor idea)
+5. **Shareable "recreation card"** — auto-generate a side-by-side (original photo vs your recreation) as one shareable image. Zero new tech needed (you already have both images), but this is the single most viral-shaped output of the whole app — it IS the marketing. (mine — I'd actually prioritize this into v1.5, it's nearly free)
+6. **Fail gracefully with a real answer, never a dead end** — if no exact match and no strong similar match either, don't just say "not found." Say something like "we couldn't confidently match this — want to explore places tagged [scenery type] near you instead?" Keeps user in the app instead of bouncing. (mine)
+7. **Hidden Frame Score reframed as user-facing only after v1 traction** — dost's idea is good but sequence matters: launch without it, watch which spots get many uploads, then surface "underused angles" from real data instead of pretending you have angle data on day one. (merged)
+8. **Consent/privacy layer for "dost ki image"** — since a core use case is uploading a friend's photo (not just public internet images) to reverse-locate it, be upfront in the app about what's being inferred (location) from someone else's photo — matters both ethically and for eventual app-store review. (mine — worth deciding early since it touches your core flow, not a bolt-on later)
+
+---
+
+## The positioning line (keep this, it's good)
+> ReShot is an AI-powered real-world recreation platform that transforms any photo into a complete adventure — it finds the place (or the closest alternative), guides you to the perfect standing position, matches the composition, and turns the experience into something shareable.
+
+---
+
+## The actual next step
+Pick ONE: Place Finder, Similar Location Engine, or Recreation Assistant — and build a rough, ugly, working version of just that one thing this week. Everything above this line is planning. Nothing counts until one piece works on a real photo, on a real phone.
