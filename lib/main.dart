@@ -16,6 +16,7 @@ import 'repositories/cloud_profile_repository.dart';
 import 'services/auth_service.dart';
 import 'services/sync_service.dart';
 import 'providers/repository_provider.dart';
+import 'providers/findra_engine_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -88,6 +89,9 @@ Future<void> main() async {
             syncService: syncService,
             cameras: cameras,
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FindraEngineProvider(),
         ),
       ],
       child: const FindraApp(),
