@@ -103,7 +103,8 @@ class OSMService {
   // Backup system: Uses Native Geocoding if Overpass fails
   Future<Map<String, dynamic>?> _reverseGeocodeFallback(double lat, double lon) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+      final geocoding = Geocoding();
+      List<Placemark> placemarks = await geocoding.placemarkFromCoordinates(lat, lon);
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
         String finalName = place.name ?? place.street ?? place.subLocality ?? place.locality ?? 'Unknown Location';
@@ -119,6 +120,7 @@ class OSMService {
     return {'name': 'Unknown Location (Offline)', 'lat': lat, 'lon': lon};
   }
 }
+
 
 
 
