@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/hidden_gem_model.dart';
 import '../models/location_model.dart';
@@ -72,7 +72,7 @@ class NavigationStandbyScreen extends StatelessWidget {
                 decoration: ReShotDesignSystem.streetPopColoredCard(CyberTheme.cardWhite),
                 child: Column(
                   children: [
-                    Text('🗺️', style: textTheme.displayLarge),
+                    Text('ðŸ—ºï¸', style: textTheme.displayLarge),
                     const SizedBox(height: 16),
                     Text(
                       'Let Google Maps guide you there.',
@@ -122,6 +122,8 @@ class NavigationStandbyScreen extends StatelessWidget {
                     latitude: targetGem.latitude,
                     longitude: targetGem.longitude,
                     altitude: targetGem.altitude,
+                    photoPath: targetGem.photoPath,
+                    tags: targetGem.tags,
                     tips: [
                       'AI Detected Pose: $detectedPose',
                       'Align the ghost vector to match the reference'
@@ -166,3 +168,5 @@ class NavigationStandbyScreen extends StatelessWidget {
     );
   }
 }
+
+

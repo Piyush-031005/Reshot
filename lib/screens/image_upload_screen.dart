@@ -229,7 +229,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                                   longitude: engine.resultLon!,
                                   altitude: 'Unknown',
                                   tags: engine.detectedLabels,
-                                  photoPath: '',
+                                  photoPath: _selectedImage?.path ?? '',
                                   createdAt: DateTime.now(),
                                   updatedAt: DateTime.now(),
                                   ownerId: 'findra-ai',

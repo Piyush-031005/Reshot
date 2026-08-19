@@ -1,4 +1,4 @@
-class LocationModel {
+﻿class LocationModel {
   final String id;
   final String name;
   final String distance;
@@ -7,6 +7,8 @@ class LocationModel {
   final double longitude;
   final String altitude;
   final List<String> tips;
+  final String? photoPath;
+  final List<String>? tags;
 
   LocationModel({
     required this.id,
@@ -17,6 +19,8 @@ class LocationModel {
     required this.longitude,
     required this.altitude,
     required this.tips,
+    this.photoPath,
+    this.tags,
   });
 
   static List<LocationModel> getMockLocations() {
@@ -66,3 +70,5 @@ class LocationModel {
     ];
   }
 }
+
+
