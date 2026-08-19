@@ -1,6 +1,7 @@
 ﻿import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:geocoding/geocoding.dart';
 
 class OSMService {
   static const String _overpassUrl = 'https://overpass-api.de/api/interpreter';
@@ -99,36 +100,26 @@ class OSMService {
     return {'name': 'Unknown Location (API Failed)', 'lat': lat, 'lon': lon};
   }
 
-  // Backup system: Uses Nominatim Reverse Geocoding if Overpass fails or is too slow
+  // Backup system: Uses Native Geocoding if Overpass fails
   Future<Map<String, dynamic>?> _reverseGeocodeFallback(double lat, double lon) async {
-    final url = 'https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json';
     try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {'User-Agent': 'FindraApp/1.0 (piyush@example.com)'},
-      );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        String? finalName = data['name'];
-        if (finalName == null || finalName.isEmpty) {
-          if (data['display_name'] != null) {
-            finalName = data['display_name'].split(',')[0];
-          }
-        }
-        if (finalName != null && finalName.isNotEmpty) {
-          return {
-            'name': finalName,
-            'lat': lat,
-            'lon': lon,
-          };
-        }
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        String finalName = place.name ?? place.street ?? place.subLocality ?? place.locality ?? 'Unknown Location';
+        return {
+          'name': finalName,
+          'lat': lat,
+          'lon': lon,
+        };
       }
     } catch (e) {
-      return {'name': 'Nominatim Error: $e', 'lat': lat, 'lon': lon};
+      debugPrint('Native geocoding error: $e');
     }
-    return {'name': 'Unknown Location (API Failed)', 'lat': lat, 'lon': lon};
+    return {'name': 'Unknown Location (Offline)', 'lat': lat, 'lon': lon};
   }
 }
+
 
 
 
