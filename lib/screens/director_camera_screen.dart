@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -43,9 +43,9 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
   double _posX = 20.0;
   double _scale = 75.0;
 
-  // RAW score — never rounded. Used for badge classification.
+  // RAW score â€” never rounded. Used for badge classification.
   double _rawScore = 30.0;
-  // Display score — rounded to 1dp for UI only.
+  // Display score â€” rounded to 1dp for UI only.
   double _displayScore = 30.0;
 
   bool _isAligned = false;
@@ -55,13 +55,28 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
   String _activeState = 'lock';
   XFile? _capturedFile;
   
-  double _ghostOpacity = 0.4; // Initial ghost opacity
+  double _ghostOpacity = 0.4;
+  double _ghostOffsetX = 0.0;
+  double _ghostOffsetY = 0.0;
+  double _ghostScale = 1.0;
+  bool _hasPerson = false;
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
     _startSensorTracking();
+    
+    final tags = widget.location.tags ?? [];
+    _hasPerson = tags.any((tag) {
+      final t = tag.toLowerCase();
+      return t.contains('person') || t.contains('human') || t.contains('face') || t.contains('people') || t.contains('boy') || t.contains('girl');
+    });
+    
+    if (!_hasPerson) {
+      _activeState = 'handover'; // skip lock state if no person
+      _isAligned = true; // allow free shooting
+    }
   }
 
   void _initializeCamera() {
@@ -107,7 +122,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
   }
 
   void _calculateScore() {
-    // Fix 2: compute raw score — NO rounding applied here.
+    // Fix 2: compute raw score â€” NO rounding applied here.
     // Badge classification uses _rawScore directly, never _displayScore.
     double pitchDiff = _pitch.abs();
     double rollDiff = (_roll.abs() - 9.8).abs();
@@ -119,16 +134,21 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
     double xAccuracy = (100 - (xDiff * 2)).clamp(0, 100);
     double scaleAccuracy = (100 - (scaleDiff * 2)).clamp(0, 100);
 
-    // Raw score — full precision double, no rounding.
+    // Raw score â€” full precision double, no rounding.
     _rawScore = (pitchAccuracy * 0.25) +
                 (rollAccuracy * 0.25) +
                 (xAccuracy * 0.25) +
                 (scaleAccuracy * 0.25);
 
-    // Display score — rounded to 1dp for UI display only.
+    // Display score â€” rounded to 1dp for UI display only.
     _displayScore = double.parse(_rawScore.toStringAsFixed(1));
 
     // Alignment uses _rawScore (strict, unrounded).
+    if (!_hasPerson) {
+      _isAligned = true;
+      return;
+    }
+
     if (_rawScore >= 92.0) {
       if (!_isAligned) {
         _isAligned = true;
@@ -145,21 +165,22 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
   }
 
   String _getGuidanceText() {
+    if (!_hasPerson) return 'Align ghost image and shoot when ready!';
     if (_isAligned) return 'Hold steady...';
     
     // Pitch is up/down tilt. Ideal is 0.
-    if (_pitch > 1.5) return 'Tilt phone down slightly 👇';
-    if (_pitch < -1.5) return 'Tilt phone up slightly 👆';
+    if (_pitch > 1.5) return 'Tilt phone down slightly ðŸ‘‡';
+    if (_pitch < -1.5) return 'Tilt phone up slightly ðŸ‘†';
     
     // Roll is side-to-side twist. Ideal is 9.8 (upright).
-    if (_roll > 10.5) return 'Level phone left 👈';
-    if (_roll < 9.0) return 'Level phone right 👉';
+    if (_roll > 10.5) return 'Level phone left ðŸ‘ˆ';
+    if (_roll < 9.0) return 'Level phone right ðŸ‘‰';
 
     // Position & Scale (simulated by sliders right now, ideal 50/100)
-    if (_posX < 45) return 'Move camera right 👉';
-    if (_posX > 55) return 'Move camera left 👈';
-    if (_scale < 95) return 'Move closer to subject 🚶‍♂️';
-    if (_scale > 105) return 'Step back from subject 🚶‍♀️';
+    if (_posX < 45) return 'Move camera right ðŸ‘‰';
+    if (_posX > 55) return 'Move camera left ðŸ‘ˆ';
+    if (_scale < 95) return 'Move closer to subject ðŸš¶â€â™‚ï¸';
+    if (_scale > 105) return 'Step back from subject ðŸš¶â€â™€ï¸';
 
     return 'Almost there...';
   }
@@ -167,7 +188,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
   void _triggerAutoShutter() {
     _shutterTimer?.cancel();
     _shutterTimer = Timer(const Duration(milliseconds: 1200), () async {
-      // Fix 1: guard — if widget disposed before timer fires, abort.
+      // Fix 1: guard â€” if widget disposed before timer fires, abort.
       if (!mounted) return;
       if (_isAligned && !_isCapturing) {
         await _captureImage();
@@ -192,7 +213,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
     });
 
     try {
-      // Cache provider before any await — avoids BuildContext across async gap warning.
+      // Cache provider before any await â€” avoids BuildContext across async gap warning.
       final provider = context.read<AppRepositoryProvider>();
 
       XFile file;
@@ -293,7 +314,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      widget.mode == 'director' ? '🎬 DIRECTOR CAMERA' : '🏔️ LANDMARK ECHO',
+                      widget.mode == 'director' ? 'ðŸŽ¬ DIRECTOR CAMERA' : 'ðŸ”ï¸ LANDMARK ECHO',
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         color: Colors.white,
                         letterSpacing: 0.5,
@@ -311,7 +332,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                       border: Border.all(color: Colors.black, width: 2),
                     ),
                     child: Text(
-                      _activeState == 'lock' ? '① SET COMP' : '② HANDED OVER',
+                      _activeState == 'lock' ? 'â‘  SET COMP' : 'â‘¡ HANDED OVER',
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         fontWeight: FontWeight.w800,
                         color: ReShotDesignSystem.inkBlack,
@@ -372,14 +393,34 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                     ),
 
                   // Ghost Photographer AR Layer (Reference Photo)
-                  IgnorePointer(
-                    child: Opacity(
-                      opacity: _ghostOpacity,
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=800&fit=crop', // Temporary default
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
+                  Positioned(
+                    left: _ghostOffsetX,
+                    top: _ghostOffsetY,
+                    child: GestureDetector(
+                      onPanUpdate: (details) {
+                        setState(() {
+                          _ghostOffsetX += details.delta.dx;
+                          _ghostOffsetY += details.delta.dy;
+                        });
+                      },
+                      child: Opacity(
+                        opacity: _ghostOpacity,
+                        child: Transform.scale(
+                          scale: _ghostScale,
+                          child: (widget.location.photoPath != null && widget.location.photoPath!.isNotEmpty)
+                              ? Image.file(
+                                  File(widget.location.photoPath!),
+                                  width: MediaQuery.of(context).size.width,
+                                  height: MediaQuery.of(context).size.height,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.network(
+                                  'https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=800&fit=crop',
+                                  width: MediaQuery.of(context).size.width,
+                                  height: MediaQuery.of(context).size.height,
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
                       ),
                     ),
                   ),
@@ -395,6 +436,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                           scale: _scale,
                           isAligned: _isAligned,
                           activeState: _activeState,
+                          hasPerson: _hasPerson,
                           detectedPose: widget.location.tips.firstWhere(
                               (t) => t.startsWith('AI Detected Pose: '),
                               orElse: () => 'Standing').replaceAll('AI Detected Pose: ', '').trim(),
@@ -443,7 +485,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                     ),
                   ),
 
-                  // Alignment HUD — cartoon speech bubble style
+                  // Alignment HUD â€” cartoon speech bubble style
                   Positioned(
                     top: 14,
                     left: 14,
@@ -468,7 +510,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                         children: [
                           // Emoji status
                           Text(
-                            _isAligned ? '✅' : '🎯',
+                            _isAligned ? 'âœ…' : 'ðŸŽ¯',
                             style: const TextStyle(fontSize: 20),
                           ),
                           const SizedBox(width: 10),
@@ -529,7 +571,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                 children: [
                   if (_activeState == 'lock') ...[
                     Text(
-                      '🕹️ DRAG TO COMPOSE',
+                      'ðŸ•¹ï¸ DRAG TO COMPOSE',
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         fontWeight: FontWeight.w800,
                         color: Colors.white54,
@@ -560,7 +602,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            '🔒 LOCK & HAND OVER',
+                            'ðŸ”’ LOCK & HAND OVER',
                             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                               color: ReShotDesignSystem.inkBlack,
                             ),
@@ -579,7 +621,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Text('🤳', style: TextStyle(fontSize: 24)),
+                          const Text('ðŸ¤³', style: TextStyle(fontSize: 24)),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
@@ -593,7 +635,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                                   ),
                                 ),
                                 Text(
-                                  'Stranger just needs to align — auto-clicks when matched!',
+                                  'Stranger just needs to align â€” auto-clicks when matched!',
                                   style: Theme.of(context).textTheme.bodySmall!.copyWith(
                                     color: Colors.white70,
                                   ),
@@ -622,7 +664,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
                               ),
                               child: Center(
                                   child: Text(
-                                    '↩ RE-COMPOSE',
+                                    'â†© RE-COMPOSE',
                                     style: Theme.of(context).textTheme.titleSmall!.copyWith(
                                       color: Colors.white70,
                                     ),
@@ -683,3 +725,5 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
     super.dispose();
   }
 }
+
+

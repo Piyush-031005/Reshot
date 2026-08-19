@@ -10,6 +10,7 @@ class CompositionOverlayPainter extends CustomPainter {
   final bool isAligned;
   final String activeState;
   final String detectedPose;
+  final bool hasPerson;
 
   CompositionOverlayPainter({
     required this.pitch,
@@ -19,6 +20,7 @@ class CompositionOverlayPainter extends CustomPainter {
     required this.isAligned,
     required this.activeState,
     required this.detectedPose,
+    this.hasPerson = true,
   });
 
   @override
@@ -28,7 +30,10 @@ class CompositionOverlayPainter extends CustomPainter {
 
     _drawGrid(canvas, size);
     _drawTiltIndicator(canvas, center, themeColor);
-    _drawSilhouette(canvas, size, themeColor);
+    
+    if (hasPerson) {
+      _drawSilhouette(canvas, size, themeColor);
+    }
   }
 
   void _drawGrid(Canvas canvas, Size size) {
@@ -156,6 +161,7 @@ class CompositionOverlayPainter extends CustomPainter {
 
     final targetCenter = Offset(size.width / 2, size.height / 2 + 50);
     _drawSkeleton(canvas, targetCenter, 100.0, targetPaint, detectedPose);
+    _drawText(canvas, 'TARGET (Reference)', Offset(targetCenter.dx, targetCenter.dy - 170.0), Colors.white54);
 
     // 3. Draw moving user skeleton matching coordinates
     final userPaint = Paint()
@@ -168,6 +174,20 @@ class CompositionOverlayPainter extends CustomPainter {
     double xOffset = (posX - 50.0) * (size.width / 150.0);
     final userCenter = Offset(size.width / 2 + xOffset, size.height / 2 + 50);
     _drawSkeleton(canvas, userCenter, scale, userPaint, detectedPose);
+    _drawText(canvas, 'YOU (Live)', Offset(userCenter.dx, userCenter.dy - (170.0 * (scale/100.0))), color);
+  }
+
+  void _drawText(Canvas canvas, String text, Offset position, Color color) {
+    final textSpan = TextSpan(
+      text: text,
+      style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
+    );
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, Offset(position.dx - (textPainter.width / 2), position.dy));
   }
 
   void _drawSkeleton(Canvas canvas, Offset bottomCenter, double figureScale, Paint paint, String pose) {
