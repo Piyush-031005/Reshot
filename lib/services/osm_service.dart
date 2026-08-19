@@ -6,7 +6,7 @@ class OSMService {
   static const String _overpassUrl = 'https://overpass-api.de/api/interpreter';
 
   Future<Map<String, dynamic>?> findSimilarNearby(List<String> labels, double lat, double lon) async {
-    if (labels.isEmpty) return null;
+    if (labels.isEmpty) return {'name': 'Unknown Location (API Failed)', 'lat': lat, 'lon': lon};
 
     String tagQuery = '';
     int radius = 50000;
@@ -96,7 +96,7 @@ class OSMService {
       return await _reverseGeocodeFallback(lat, lon);
     }
     
-    return null;
+    return {'name': 'Unknown Location (API Failed)', 'lat': lat, 'lon': lon};
   }
 
   // Backup system: Uses Nominatim Reverse Geocoding if Overpass fails or is too slow
@@ -124,10 +124,11 @@ class OSMService {
         }
       }
     } catch (e) {
-      debugPrint('Nominatim fallback error: $e');
+      return {'name': 'Nominatim Error: $e', 'lat': lat, 'lon': lon};
     }
-    return null;
+    return {'name': 'Unknown Location (API Failed)', 'lat': lat, 'lon': lon};
   }
 }
+
 
 
