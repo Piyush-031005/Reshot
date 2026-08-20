@@ -107,7 +107,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                                       children: [
                                         ScaleTransition(
                                           scale: Tween<double>(begin: 0.9, end: 1.1).animate(_pulseController),
-                                          child: Text('ðŸ‘ï¸', style: textTheme.displayLarge!.copyWith(color: Colors.white)),
+                                          child: Text('👁️', style: textTheme.displayLarge!.copyWith(color: Colors.white)),
                                         ),
                                         const SizedBox(height: 16),
                                         Text(
@@ -143,113 +143,116 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
               const SizedBox(height: 24),
               
               // Result Card
-              if (engine.state == EngineState.success && engine.resultName != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: ReShotDesignSystem.streetPopColoredCard(CyberTheme.limeGreen),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text('âœ¨', style: const TextStyle(fontSize: 24)),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Similar Vibe Found!',
-                                  style: textTheme.titleLarge,
-                                ),
-                                Text(
-                                  'Found a similar spot nearby based on labels.',
-                                  style: textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // AI Inference Details
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: CyberTheme.inkBlack,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              if (engine.state == EngineState.success && engine.results.isNotEmpty) ...[
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: ReShotDesignSystem.streetPopColoredCard(CyberTheme.limeGreen),
+                    child: Column(
+                      children: [
+                        Row(
                           children: [
-                            Expanded(
-                              child: Text(
-                                'Detected: ${engine.detectedLabels.take(3).join(", ")}',
-                                style: textTheme.bodySmall!.copyWith(color: CyberTheme.cardWhite),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: CyberTheme.cardWhite,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: CyberTheme.outlineBlack, width: 2),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                            const Text('✨', style: TextStyle(fontSize: 24)),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(engine.resultName!, style: textTheme.titleMedium, overflow: TextOverflow.ellipsis),
-                                  Text('${engine.resultLat!.toStringAsFixed(4)}, ${engine.resultLon!.toStringAsFixed(4)}', style: textTheme.bodySmall),
+                                  Text('Similar Vibes Found!', style: textTheme.titleLarge),
+                                  Text('Nearest locations based on labels.', style: textTheme.bodyMedium),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CyberTheme.inkBlack,
-                                foregroundColor: CyberTheme.cardWhite,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                textStyle: textTheme.bodyLarge,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              ),
-                              onPressed: () {
-                                final gem = HiddenGemModel(
-                                  id: 'osm-temp',
-                                  name: engine.resultName!,
-                                  description: 'Discovered via Findra AI',
-                                  latitude: engine.resultLat!,
-                                  longitude: engine.resultLon!,
-                                  altitude: 'Unknown',
-                                  tags: engine.detectedLabels,
-                                  photoPath: _selectedImage?.path ?? '',
-                                  createdAt: DateTime.now(),
-                                  updatedAt: DateTime.now(),
-                                  ownerId: 'findra-ai',
-                                );
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (c) => NavigationStandbyScreen(
-                                      targetGem: gem,
-                                      detectedPose: 'Standing', // Defaulting for now
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: const Text('GO THERE'),
-                            )
                           ],
                         ),
-                      )
-                    ],
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(color: CyberTheme.inkBlack, borderRadius: BorderRadius.circular(8)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Detected: $',
+                                  style: textTheme.bodySmall!.copyWith(color: CyberTheme.cardWhite),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: engine.results.length,
+                            itemBuilder: (context, index) {
+                              final place = engine.results[index];
+                              final distanceKm = (place['distance'] as double) / 1000.0;
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: CyberTheme.cardWhite,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: CyberTheme.outlineBlack, width: 2),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(place['name'], style: textTheme.titleMedium, overflow: TextOverflow.ellipsis),
+                                          Text('$ km away', style: textTheme.bodySmall!.copyWith(fontWeight: FontWeight.bold, color: CyberTheme.sunOrange)),
+                                          Text('$, $', style: textTheme.bodySmall),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: CyberTheme.inkBlack,
+                                        foregroundColor: CyberTheme.cardWhite,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        textStyle: textTheme.bodyLarge,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      ),
+                                      onPressed: () {
+                                        final gem = HiddenGemModel(
+                                          id: 'osm-temp-$index',
+                                          name: place['name'],
+                                          description: 'Discovered via Findra AI',
+                                          latitude: place['lat'],
+                                          longitude: place['lon'],
+                                          altitude: 'Unknown',
+                                          tags: engine.detectedLabels,
+                                          photoPath: _selectedImage?.path ?? '',
+                                          createdAt: DateTime.now(),
+                                          updatedAt: DateTime.now(),
+                                          ownerId: 'findra-ai',
+                                        );
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (c) => NavigationStandbyScreen(
+                                              targetGem: gem,
+                                              detectedPose: 'Standing',
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text('GO'),
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ] else if (engine.state == EngineState.error) ...[
@@ -295,4 +298,3 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
     );
   }
 }
-
