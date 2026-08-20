@@ -67,7 +67,7 @@ class OSMService {
           'User-Agent': 'FindraApp/1.0 (piyush@example.com)'
         },
         body: {'data': query},
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -103,8 +103,7 @@ class OSMService {
   // Backup system: Uses Native Geocoding if Overpass fails
   Future<Map<String, dynamic>?> _reverseGeocodeFallback(double lat, double lon) async {
     try {
-      final geocoding = Geocoding();
-      List<Placemark> placemarks = await geocoding.placemarkFromCoordinates(lat, lon);
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
         String finalName = place.name ?? place.street ?? place.subLocality ?? place.locality ?? 'Unknown Location';
@@ -120,6 +119,7 @@ class OSMService {
     return {'name': 'Unknown Location (Offline)', 'lat': lat, 'lon': lon};
   }
 }
+
 
 
 
