@@ -15,14 +15,8 @@ class FindraEngineProvider extends ChangeNotifier {
   List<String> _detectedLabels = [];
   List<String> get detectedLabels => _detectedLabels;
 
-  String? _resultName;
-  String? get resultName => _resultName;
-
-  double? _resultLat;
-  double? get resultLat => _resultLat;
-
-  double? _resultLon;
-  double? get resultLon => _resultLon;
+  List<Map<String, dynamic>> _results = [];
+  List<Map<String, dynamic>> get results => _results;
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
@@ -54,7 +48,6 @@ class FindraEngineProvider extends ChangeNotifier {
           permission = await Geolocator.requestPermission();
         }
         if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
-          // Use getLastKnownPosition first for speed, then getCurrentPosition with timeout
           Position? position = await Geolocator.getLastKnownPosition();
           position ??= await Geolocator.getCurrentPosition(
             timeLimit: const Duration(seconds: 5),
@@ -68,12 +61,10 @@ class FindraEngineProvider extends ChangeNotifier {
       }
 
       // 3. Search OpenStreetMap for similar nearby locations
-      final place = await _osmService.findSimilarNearby(_detectedLabels, lat, lon);
+      final places = await _osmService.findSimilarNearby(_detectedLabels, lat, lon);
 
-      if (place != null) {
-        _resultName = place['name'];
-        _resultLat = place['lat'];
-        _resultLon = place['lon'];
+      if (places.isNotEmpty) {
+        _results = places;
         _state = EngineState.success;
       } else {
         _state = EngineState.error;
@@ -92,9 +83,7 @@ class FindraEngineProvider extends ChangeNotifier {
   void reset() {
     _state = EngineState.idle;
     _detectedLabels = [];
-    _resultName = null;
-    _resultLat = null;
-    _resultLon = null;
+    _results = [];
     _errorMessage = null;
     notifyListeners();
   }
