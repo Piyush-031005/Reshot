@@ -276,7 +276,7 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => RecreationCardScreen(
-          originalImagePath: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&h=800&fit=crop', // Hardcoded reference for MVP
+          originalImagePath: widget.location.photoPath,
           capturedImagePath: _capturedFile!.path,
           matchScore: _displayScore,
           locationName: widget.location.name,
@@ -725,5 +725,6 @@ class _DirectorCameraScreenState extends State<DirectorCameraScreen> {
     super.dispose();
   }
 }
+
 
 
