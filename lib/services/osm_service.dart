@@ -1,13 +1,13 @@
 ﻿import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import 'package:geocoding/geocoding.dart' as geo;
+import 'package:geolocator/geolocator.dart';
 
 class OSMService {
   static const String _overpassUrl = 'https://overpass-api.de/api/interpreter';
 
-  Future<Map<String, dynamic>?> findSimilarNearby(List<String> labels, double lat, double lon) async {
-    if (labels.isEmpty) return {'name': 'Unknown Location (API Failed)', 'lat': lat, 'lon': lon};
+  Future<List<Map<String, dynamic>>> findSimilarNearby(List<String> labels, double lat, double lon) async {
+    if (labels.isEmpty) return [];
 
     String tagQuery = '';
     int radius = 50000;
@@ -56,8 +56,10 @@ class OSMService {
       (
         $tagQuery(around:$radius,$lat,$lon);
       );
-      out center 1;
+      out center 10;
     ''';
+
+    List<Map<String, dynamic>> results = [];
 
     try {
       final response = await http.post(
@@ -72,59 +74,32 @@ class OSMService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['elements'] != null && data['elements'].isNotEmpty) {
-          final firstMatch = data['elements'][0];
-          String name = firstMatch['tags']?['name'] ?? 'Similar Location found via OpenStreetMap';
-          
-          double? elementLat = firstMatch['lat'] ?? firstMatch['center']?['lat'];
-          double? elementLon = firstMatch['lon'] ?? firstMatch['center']?['lon'];
-          
-          if (elementLat != null && elementLon != null) {
-            return {
-              'name': name,
-              'lat': elementLat,
-              'lon': elementLon,
-            };
+          for (var element in data['elements']) {
+            String name = element['tags']?['name'] ?? 'Unknown Location';
+            double? elementLat = element['lat'] ?? element['center']?['lat'];
+            double? elementLon = element['lon'] ?? element['center']?['lon'];
+            
+            if (elementLat != null && elementLon != null && name != 'Unknown Location') {
+              double distance = Geolocator.distanceBetween(lat, lon, elementLat, elementLon);
+              results.add({
+                'name': name,
+                'lat': elementLat,
+                'lon': elementLon,
+                'distance': distance,
+              });
+            }
           }
-        } else {
-           return await _reverseGeocodeFallback(lat, lon);
+          
+          // Sort ascending by distance
+          results.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
         }
       } else {
-        debugPrint('OSM Overpass API error: ${response.statusCode}');
-        return await _reverseGeocodeFallback(lat, lon);
+        debugPrint('OSM Overpass API error: $');
       }
     } catch (e) {
       debugPrint('OSMService error: $e');
-      return await _reverseGeocodeFallback(lat, lon);
     }
     
-    return {'name': 'Unknown Location (API Failed)', 'lat': lat, 'lon': lon};
-  }
-
-  // Backup system: Uses Native Geocoding if Overpass fails
-  Future<Map<String, dynamic>?> _reverseGeocodeFallback(double lat, double lon) async {
-    try {
-      final geocoder = geo.Geocoding();
-      List<geo.Placemark> placemarks = await geocoder.placemarkFromCoordinates(lat, lon);
-      if (placemarks.isNotEmpty) {
-        geo.Placemark place = placemarks.first;
-        String finalName = place.name ?? place.street ?? place.subLocality ?? place.locality ?? 'Unknown Location';
-        return {
-          'name': finalName,
-          'lat': lat,
-          'lon': lon,
-        };
-      }
-    } catch (e) {
-      debugPrint('Native geocoding error: $e');
-    }
-    return {'name': 'Unknown Location (Offline)', 'lat': lat, 'lon': lon};
+    return results;
   }
 }
-
-
-
-
-
-
-
-
