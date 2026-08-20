@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -107,7 +107,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                                       children: [
                                         ScaleTransition(
                                           scale: Tween<double>(begin: 0.9, end: 1.1).animate(_pulseController),
-                                          child: Text('👁️', style: textTheme.displayLarge!.copyWith(color: Colors.white)),
+                                          child: Text('ðŸ‘ï¸', style: textTheme.displayLarge!.copyWith(color: Colors.white)),
                                         ),
                                         const SizedBox(height: 16),
                                         Text(
@@ -151,7 +151,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
                     children: [
                       Row(
                         children: [
-                          Text('✨', style: const TextStyle(fontSize: 24)),
+                          Text('âœ¨', style: const TextStyle(fontSize: 24)),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -295,3 +295,4 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> with TickerProvid
     );
   }
 }
+
