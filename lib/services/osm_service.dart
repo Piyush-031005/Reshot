@@ -1,7 +1,7 @@
 ﻿import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:geocoding/geocoding.dart' as geo;
 
 class OSMService {
   static const String _overpassUrl = 'https://overpass-api.de/api/interpreter';
@@ -103,9 +103,9 @@ class OSMService {
   // Backup system: Uses Native Geocoding if Overpass fails
   Future<Map<String, dynamic>?> _reverseGeocodeFallback(double lat, double lon) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+      List<geo.Placemark> placemarks = await geo.placemarkFromCoordinates(lat, lon);
       if (placemarks.isNotEmpty) {
-        Placemark place = placemarks.first;
+        geo.Placemark place = placemarks.first;
         String finalName = place.name ?? place.street ?? place.subLocality ?? place.locality ?? 'Unknown Location';
         return {
           'name': finalName,
@@ -119,6 +119,7 @@ class OSMService {
     return {'name': 'Unknown Location (Offline)', 'lat': lat, 'lon': lon};
   }
 }
+
 
 
 
